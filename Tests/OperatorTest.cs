@@ -1,19 +1,19 @@
 ﻿/* ------------------------------------------------------------------------- */
-///
-/// Copyright (c) 2010 CubeSoft, Inc.
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License");
-/// you may not use this file except in compliance with the License.
-/// You may obtain a copy of the License at
-///
-///  http://www.apache.org/licenses/LICENSE-2.0
-///
-/// Unless required by applicable law or agreed to in writing, software
-/// distributed under the License is distributed on an "AS IS" BASIS,
-/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-/// See the License for the specific language governing permissions and
-/// limitations under the License.
-///
+//
+// Copyright (c) 2010 CubeSoft, Inc.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 /* ------------------------------------------------------------------------- */
 using System;
 using System.Collections.Generic;
@@ -45,11 +45,10 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         /// 
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void GetFiles(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void GetFiles(Operator io)
         {
-            var io = new Operator(core);
-            Assert.That(io.GetFiles(Examples).Count(), Is.GreaterThan(1));
+            Assert.That(io.GetFiles(Examples).Count(), Is.EqualTo(2));
             Assert.That(io.GetFiles(Example("Sample.txt")), Is.Null);
 
             var empty = Result("Empty");
@@ -68,11 +67,10 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         /// 
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void GetDirectories(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void GetDirectories(Operator io)
         {
-            var io = new Operator(core);
-            Assert.That(io.GetDirectories(Examples).Count(), Is.GreaterThanOrEqualTo(1));
+            Assert.That(io.GetDirectories(Examples).Count(), Is.EqualTo(1));
             Assert.That(io.GetDirectories(Example("Sample.txt")), Is.Null);
 
             var empty = Result("Empty");
@@ -91,19 +89,28 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void Get_Properties(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void Get_Properties(Operator io)
         {
-            var io   = new Operator(core);
             var file = io.Get(Example("Sample.txt"));
             var dir  = io.Get(file.DirectoryName);
             var cmp  = new DateTime(2017, 6, 5);
 
-            Assert.That(file.DirectoryName,  Is.EqualTo(Examples));
-            Assert.That(dir.DirectoryName,   Is.Not.Null.And.Not.Empty);
-            Assert.That(file.CreationTime,   Is.GreaterThan(cmp));
-            Assert.That(file.LastWriteTime,  Is.GreaterThan(cmp));
-            Assert.That(file.LastAccessTime, Is.GreaterThan(cmp));
+            Assert.That(file.FullName,             Is.EqualTo(Example("Sample.txt")));
+            Assert.That(file.Name,                 Is.EqualTo("Sample.txt"));
+            Assert.That(file.NameWithoutExtension, Is.EqualTo("Sample"));
+            Assert.That(file.Extension,            Is.EqualTo(".txt"));
+            Assert.That(file.DirectoryName,        Is.EqualTo(Examples));
+            Assert.That(file.CreationTime,         Is.GreaterThan(cmp));
+            Assert.That(file.LastWriteTime,        Is.GreaterThan(cmp));
+            Assert.That(file.LastAccessTime,       Is.GreaterThan(cmp));
+
+            Assert.That(dir.FullName,              Is.EqualTo(Examples));
+            Assert.That(dir.Name,                  Is.EqualTo("Examples"));
+            Assert.That(dir.NameWithoutExtension,  Is.EqualTo("Examples"));
+            Assert.That(dir.Extension,             Is.Empty);
+            Assert.That(dir.DirectoryName,         Is.Not.Null.And.Not.Empty);
+
             Assert.DoesNotThrow(() =>
             {
                 file.Refresh();
@@ -120,12 +127,9 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void Get_Throws(IOperatorCore core)
-        {
-            var io = new Operator(core);
-            Assert.That(() => io.Get(string.Empty), Throws.TypeOf<ArgumentException>());
-        }
+        [TestCaseSource(nameof(TestCases))]
+        public void Get_Throws(Operator io)
+            => Assert.That(() => io.Get(string.Empty), Throws.TypeOf<ArgumentException>());
 
         /* ----------------------------------------------------------------- */
         ///
@@ -136,12 +140,10 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void Create(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void Create(Operator io)
         {
             var dest = Result(@"Directory\Create.txt");
-            var io = new Operator(core);
-
             using (var stream = io.Create(dest)) stream.WriteByte((byte)'A');
             Assert.That(io.Get(dest).Length, Is.EqualTo(1));
         }
@@ -155,16 +157,21 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void OpenWrite(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void OpenWrite(Operator io)
         {
-            var dest = Result("OpenWrite.txt");
-            var io = new Operator(core);
-            io.Copy(Example("Sample.txt"), dest, true);
+            var src  = io.Get(Example("Sample.txt"));
+            var dest = io.Get(Result("OpenWrite.txt"));
 
-            var count = io.Get(dest).Length;
-            using (var stream = io.OpenWrite(dest)) stream.WriteByte((byte)'A');
-            Assert.That(io.Get(dest).Length, Is.EqualTo(count));
+            io.Copy(src.FullName, dest.FullName, true);
+            io.SetAttributes(dest.FullName, src.Attributes);
+            io.SetCreationTime(dest.FullName, src.CreationTime);
+            io.SetLastWriteTime(dest.FullName, DateTime.Now);
+            io.SetLastAccessTime(dest.FullName, DateTime.Now);
+
+            var count = dest.Length;
+            using (var stream = io.OpenWrite(dest.FullName)) stream.WriteByte((byte)'A');
+            Assert.That(dest.Length, Is.EqualTo(count));
 
             var newfile = Result(@"Directory\OpenWrite.txt");
             using (var stream = io.OpenWrite(newfile)) stream.WriteByte((byte)'A');
@@ -180,38 +187,35 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void Move(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void Move(Operator io)
         {
-            var io = new Operator(core);
             io.Failed += (s, e) => Assert.Fail($"{e.Name}: {e.Exception}");
 
-            var info = io.Get("Sample.txt");
-            var src  = io.Get(io.Combine(Results, info.Name));
-            var dest = io.Get(io.Combine(Results, $"{info.NameWithoutExtension}-Move{info.Extension}"));
+            var name = "Archive";
+            var src  = io.Get(io.Combine(Results, name));
+            var dest = io.Get(io.Combine(Results, $"{name}-Move"));
 
-            io.Copy(io.Combine(Examples, info.Name), src.FullName, false);
+            io.Copy(Example(name), src.FullName, false);
             src.Refresh();
             Assert.That(src.Exists, Is.True);
 
             io.Copy(src.FullName, dest.FullName, false);
-            io.SetAttributes(dest.FullName, System.IO.FileAttributes.ReadOnly);
-
             io.Move(src.FullName, dest.FullName, true);
             src.Refresh();
             dest.Refresh();
-            Assert.That(src.Exists,  Is.False);
+            Assert.That(src.Exists, Is.False);
             Assert.That(dest.Exists, Is.True);
 
             io.Move(dest.FullName, src.FullName);
             src.Refresh();
             dest.Refresh();
-            Assert.That(src.Exists,  Is.True);
+            Assert.That(src.Exists, Is.True);
             Assert.That(dest.Exists, Is.False);
 
             io.Delete(src.FullName);
             src.Refresh();
-            Assert.That(src.Exists,  Is.False);
+            Assert.That(src.Exists, Is.False);
         }
 
         /* ----------------------------------------------------------------- */
@@ -223,11 +227,10 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void Move_Failed(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void Move_Failed(Operator io)
         {
             var failed = false;
-            var io = new Operator(core);
             io.Failed += (s, e) =>
             {
                 // try twice
@@ -236,6 +239,7 @@ namespace Cube.FileSystem.Tests
 
                 Assert.That(e.Name,          Is.EqualTo("Move"));
                 Assert.That(e.Paths.Count(), Is.EqualTo(2));
+                Assert.That(e.Exception,     Is.TypeOf<System.IO.FileNotFoundException>());
             };
 
             var src  = io.Combine(Results, "FileNotFound.txt");
@@ -254,19 +258,19 @@ namespace Cube.FileSystem.Tests
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void Open_Failed(IOperatorCore core)
+        [TestCaseSource(nameof(TestCases))]
+        public void Open_Failed(Operator io)
         {
             var failed = false;
-            var io = new Operator(core);
             io.Failed += (s, e) =>
             {
                 // try twice
                 e.Cancel = failed;
                 failed   = true;
 
-                Assert.That(e.Name, Is.EqualTo("OpenRead"));
+                Assert.That(e.Name,          Is.EqualTo("OpenRead"));
                 Assert.That(e.Paths.Count(), Is.EqualTo(1));
+                Assert.That(e.Exception,     Is.TypeOf<System.IO.FileNotFoundException>());
             };
 
             var src    = io.Combine(Results, "FileNotFound.txt");
@@ -290,16 +294,31 @@ namespace Cube.FileSystem.Tests
         /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
-        [TestCaseSource(nameof(Operator_TestCases))]
-        public void Move_Throws(IOperatorCore core)
-            => Assert.That(() =>
-            {
-                var io   = new Operator(core);
-                var src  = io.Combine(Results, "FileNotFound.txt");
-                var dest = io.Combine(Results, "Moved.txt");
-                io.Move(src, dest);
-            },
-            Throws.TypeOf<System.IO.FileNotFoundException>());
+        [TestCaseSource(nameof(TestCases))]
+        public void Move_Throws(Operator io) => Assert.That(() =>
+        {
+            var src  = io.Combine(Results, "FileNotFound.txt");
+            var dest = io.Combine(Results, "Moved.txt");
+            io.Move(src, dest);
+        },
+        Throws.TypeOf<System.IO.FileNotFoundException>());
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Open_Throws
+        ///
+        /// <summary>
+        /// ファイルを開く操作に失敗するテストを実行します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [TestCaseSource(nameof(TestCases))]
+        public void Open_Throws(Operator io) => Assert.That(() =>
+        {
+            var src    = io.Combine(Results, "FileNotFound.txt");
+            var stream = io.OpenRead(src);
+        },
+        Throws.TypeOf<System.IO.FileNotFoundException>());
 
         #endregion
 
@@ -307,19 +326,19 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Operator_TestCases
+        /// TestCases
         ///
         /// <summary>
         /// 各種 Operator のテスト用データを取得します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private static IEnumerable<TestCaseData> Operator_TestCases
+        private static IEnumerable<TestCaseData> TestCases
         {
             get
             {
-                yield return new TestCaseData(new OperatorCore());
-                yield return new TestCaseData(new Alpha());
+                yield return new TestCaseData(new Operator());
+                yield return new TestCaseData(new AfsOperator());
             }
         }
 

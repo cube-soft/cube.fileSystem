@@ -16,26 +16,26 @@
 //
 /* ------------------------------------------------------------------------- */
 using System;
-using System.IO;
+using Alphaleonis.Win32.Filesystem;
 
 namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// Information
+    /// AfsInformation
     /// 
     /// <summary>
-    /// 標準ライブラリを利用した IInformation の実装クラスです。
+    /// AlphaFS を利用した IInformation の実装クラスです。
     /// </summary>
     /// 
     /* --------------------------------------------------------------------- */
-    public class Information : IInformation
+    internal class AfsInformation : IInformation
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Information
+        /// AlphaInformation
         ///
         /// <summary>
         /// オブジェクトを初期化します。
@@ -44,7 +44,7 @@ namespace Cube.FileSystem
         /// <param name="path">ファイルまたはディレクトリのパス</param>
         /// 
         /* ----------------------------------------------------------------- */
-        public Information(string path)
+        public AfsInformation(string path)
         {
             Reset(path);
         }
@@ -152,7 +152,7 @@ namespace Cube.FileSystem
         /// </summary>
         /// 
         /* ----------------------------------------------------------------- */
-        public FileAttributes Attributes => RawObject.Attributes;
+        public System.IO.FileAttributes Attributes => RawObject.Attributes;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -235,7 +235,7 @@ namespace Cube.FileSystem
 
         /* ----------------------------------------------------------------- */
         ///
-        /// TryCast
+        /// FileInfo
         ///
         /// <summary>
         /// FileInfo オブジェクトへのキャストを施行します。
