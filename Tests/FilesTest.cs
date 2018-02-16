@@ -36,6 +36,55 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
+        /// Load
+        ///
+        /// <summary>
+        /// ファイルを読み込むテストを実行します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [Test]
+        public void Load() => new Operator().Load(
+            Example("Sample.txt"),
+            e => Assert.That(e.Length, Is.EqualTo(13L))
+        );
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Load_NotFound
+        ///
+        /// <summary>
+        /// 存在しないファイルを読み込もうとした時の挙動を確認します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [Test]
+        public void Load_NotFound() => Assert.That(
+            new Operator().Load(Example("NotFound.dummy"), e => e.Length, -1),
+            Is.EqualTo(-1L)
+        );
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Save
+        ///
+        /// <summary>
+        /// ファイルを保存するテストを実行します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [Test]
+        public void Save()
+        {
+            var io   = new Operator();
+            var dest = Result(nameof(Save));
+
+            io.Save(dest, e => e.WriteByte((byte)'a'));
+            Assert.That(io.Get(dest).Length, Is.EqualTo(1));
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
         /// GetTypeName
         ///
         /// <summary>
@@ -44,7 +93,7 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCase("Sample.txt",     ExpectedResult = true)]
-        [TestCase("NotExist.dummy", ExpectedResult = true)]
+        [TestCase("NotFound.dummy", ExpectedResult = true)]
         public bool GetTypeName(string filename) =>
             !string.IsNullOrEmpty(IO.GetTypeName(IO.Get(Example(filename))));
 
