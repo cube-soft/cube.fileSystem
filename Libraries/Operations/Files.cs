@@ -18,6 +18,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Cube.Log;
+using Cube.Streams;
 
 namespace Cube.FileSystem.Files
 {
