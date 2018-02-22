@@ -15,10 +15,10 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
-using System;
-using System.Runtime.InteropServices;
 using Cube.Log;
 using Cube.Streams;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Cube.FileSystem.Files
 {
@@ -83,15 +83,59 @@ namespace Cube.FileSystem.Files
 
         /* ----------------------------------------------------------------- */
         ///
+        /// LoadEx
+        ///
+        /// <summary>
+        /// ファイルを開いて内容を読み込みます。
+        /// </summary>
+        ///
+        /// <remarks>
+        /// .NET 3.5 専用の拡張メソッドです。
+        /// </remarks>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static T LoadEx<T>(this Operator io, string src,
+            Func<System.IO.TextReader, T> func, T error = default(T)) => io.LogWarn(() =>
+        {
+            if (io.Exists(src) && io.Get(src).Length > 0)
+            {
+                var code = System.Text.Encoding.UTF8;
+                using (var ss = new System.IO.StreamReader(io.OpenRead(src), code)) return func(ss);
+            }
+            return error;
+        }, error);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// LoadEx
+        ///
+        /// <summary>
+        /// ファイルを開いて内容を読み込みます。
+        /// </summary>
+        ///
+        /// <remarks>
+        /// .NET 3.5 専用の拡張メソッドです。
+        /// </remarks>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static void LoadEx(this Operator io, string src,
+            Action<System.IO.TextReader> action) => io.LoadEx(src, e =>
+        {
+            action(e);
+            return true;
+        }, false);
+
+        /* ----------------------------------------------------------------- */
+        ///
         /// Save
         ///
         /// <summary>
         /// ファイルに保存します。
         /// </summary>
         ///
-        /// <param name="io">入出力用オブジェクト</param>
-        /// <param name="dest">ファイルのパス</param>
-        /// <param name="action">出力ストリームに対する処理</param>
+        /// <remarks>
+        /// .NET 3.5 専用の拡張メソッドです。
+        /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
         public static void Save(this Operator io, string dest,
@@ -107,6 +151,34 @@ namespace Cube.FileSystem.Files
                 }
             }
         });
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Save
+        ///
+        /// <summary>
+        /// ファイルに保存します。
+        /// </summary>
+        ///
+        /// <param name="io">入出力用オブジェクト</param>
+        /// <param name="dest">ファイルのパス</param>
+        /// <param name="action">出力ストリームに対する処理</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static void SaveEx(this Operator io, string dest,
+           Action<System.IO.TextWriter> action) => io.LogWarn(() =>
+           {
+               var code = System.Text.Encoding.UTF8;
+               using (var ss = new System.IO.StreamWriter(new System.IO.MemoryStream(), code))
+               {
+                   action(ss);
+                   using (var ds = io.Create(dest))
+                   {
+                       ss.BaseStream.Position = 0;
+                       ss.BaseStream.CopyTo(ds);
+                   }
+               }
+           });
 
         /* ----------------------------------------------------------------- */
         ///
