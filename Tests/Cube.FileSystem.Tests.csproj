@@ -77,7 +77,7 @@
       <HintPath>..\..\packages\Cube.Backwards.1.4.1\lib\net35\Cube.Backwards.dll</HintPath>
     </Reference>
     <Reference Include="Cube.Core">
-      <HintPath>..\..\packages\Cube.Core.1.9.0\lib\net35\Cube.Core.dll</HintPath>
+      <HintPath>..\..\packages\Cube.Core.1.10.0\lib\net35\Cube.Core.dll</HintPath>
     </Reference>
     <Reference Include="log4net">
       <HintPath>..\..\packages\log4net.2.0.8\lib\net35-full\log4net.dll</HintPath>
@@ -93,9 +93,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Details\FileHelper.cs" />
-    <Compile Include="Details\GlobalSetup.cs" />
-    <Compile Include="FilesTest.cs" />
+    <Compile Include="DisplayFilterTest.cs" />
+    <Compile Include="GlobalSetup.cs" />
+    <Compile Include="IoExtensionTest.cs" />
     <Compile Include="IoTest.cs" />
     <Compile Include="PathFilterTest.cs" />
     <Compile Include="ShortcutTest.cs" />
@@ -103,9 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="Packages.config" />
     <None Include="Examples\SampleDirectory\FilterDirectory\Filter.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -16,37 +16,42 @@
 //
 /* ------------------------------------------------------------------------- */
 using System;
-using Alphaleonis.Win32.Filesystem;
+using System.IO;
 
 namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// AfsInformation
+    /// InformationCore
     ///
     /// <summary>
-    /// AlphaFS を利用した IInformation の実装クラスです。
+    /// ファイルまたはディレクトリの情報を保持するためのクラスです。
     /// </summary>
     ///
+    /// <remarks>
+    /// このクラスは通常 Information オブジェクトの内部情報を
+    /// RefreshController 経由で更新する際に使用されます。
+    /// </remarks>
+    ///
     /* --------------------------------------------------------------------- */
-    internal class AfsInformation : IInformation
+    public class InformationCore
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// AlphaInformation
+        /// Information
         ///
         /// <summary>
         /// オブジェクトを初期化します。
         /// </summary>
         ///
-        /// <param name="path">ファイルまたはディレクトリのパス</param>
+        /// <param name="src">ファイルまたはディレクトリのパス</param>
         ///
         /* ----------------------------------------------------------------- */
-        public AfsInformation(string path)
+        public InformationCore(string src)
         {
-            Reset(path);
+            Source = src;
         }
 
         #endregion
@@ -55,192 +60,149 @@ namespace Cube.FileSystem
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Exists
+        /// Source
         ///
         /// <summary>
-        /// ファイルまたはディレクトリが存在するかどうかを示す値を
-        /// 取得します。
+        /// オリジナルのパスを取得します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool Exists => RawObject.Exists;
+        public string Source { get; }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Exists
+        ///
+        /// <summary>
+        /// ファイルまたはディレクトリが存在するかどうかを示す値を取得
+        /// または設定します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public bool Exists { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// IsDirectory
         ///
         /// <summary>
-        /// ディレクトリかどうかを示す値を取得します。
+        /// ディレクトリかどうかを示す値を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool IsDirectory => RawObject is DirectoryInfo;
+        public bool IsDirectory { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Name
         ///
         /// <summary>
-        /// ファイル名を取得します。
+        /// ファイル名を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Name => RawObject.Name;
+        public string Name { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// NameWithoutExtension
         ///
         /// <summary>
-        /// 拡張子を除いたファイル名を取得します。
+        /// 拡張子を除いたファイル名を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string NameWithoutExtension => Path.GetFileNameWithoutExtension(Name);
+        public string NameWithoutExtension { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Extension
         ///
         /// <summary>
-        /// 拡張子を取得します。
+        /// 拡張子を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Extension => RawObject.Extension;
+        public string Extension { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// FullName
         ///
         /// <summary>
-        /// 完全なパスを取得します。
+        /// 完全なパスを取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string FullName => RawObject.FullName;
+        public string FullName { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// DirectoryName
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの親ディレクトリのパスを取得します。
+        /// ファイルまたはディレクトリの親ディレクトリのパスを取得または
+        /// 設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string DirectoryName =>
-            TryCast()?.DirectoryName ?? Path.GetDirectoryName(FullName);
+        public string DirectoryName { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Length
         ///
         /// <summary>
-        /// ファイルサイズを取得します。
+        /// ファイルサイズを取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public long Length => TryCast()?.Length ?? 0;
+        public long Length { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Attributes
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの属性を取得します。
+        /// ファイルまたはディレクトリの属性を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public System.IO.FileAttributes Attributes => RawObject.Attributes;
+        public FileAttributes Attributes { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// CreationTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの作成日時を取得します。
+        /// ファイルまたはディレクトリの作成日時を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime CreationTime => RawObject.CreationTime;
+        public DateTime CreationTime { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// LastWriteTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの最終更新日時を取得します。
+        /// ファイルまたはディレクトリの最終更新日時を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastWriteTime => RawObject.LastWriteTime;
+        public DateTime LastWriteTime { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// LastAccessTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの最終アクセス日時を取得します。
+        /// ファイルまたはディレクトリの最終アクセス日時を取得または
+        /// 設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastAccessTime => RawObject.LastAccessTime;
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// RawObject
-        ///
-        /// <summary>
-        /// 実装オブジェクトを取得します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public FileSystemInfo RawObject { get; private set; }
-
-        #endregion
-
-        #region Methods
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Refresh
-        ///
-        /// <summary>
-        /// オブジェクトを最新の状態に更新します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public void Refresh() => Reset(FullName);
-
-        #endregion
-
-        #region Implementations
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Reset
-        ///
-        /// <summary>
-        /// RawObject をリセットします。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        private void Reset(string path) =>
-            RawObject = Directory.Exists(path) ?
-                        new DirectoryInfo(path) as FileSystemInfo :
-                        new FileInfo(path) as FileSystemInfo;
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// FileInfo
-        ///
-        /// <summary>
-        /// FileInfo オブジェクトへのキャストを施行します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        private FileInfo TryCast() => RawObject as FileInfo;
+        public DateTime LastAccessTime { get; set; }
 
         #endregion
     }

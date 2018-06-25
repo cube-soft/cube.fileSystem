@@ -32,6 +32,10 @@ namespace Cube.FileSystem
     /* --------------------------------------------------------------------- */
     public class IO
     {
+        #region Properties
+
+        #endregion
+
         #region Methods
 
         #region Get
@@ -50,7 +54,7 @@ namespace Cube.FileSystem
         /// <returns>IInformation オブジェクト</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public IInformation Get(string path) => GetCore(path);
+        public Information Get(string path) => GetCore(path);
 
         /* ----------------------------------------------------------------- */
         ///
@@ -66,7 +70,44 @@ namespace Cube.FileSystem
         /// <returns>IInformation オブジェクト</returns>
         ///
         /* ----------------------------------------------------------------- */
-        protected virtual IInformation GetCore(string path) => new Information(path);
+        protected virtual Information GetCore(string path) =>
+            new Information(path, GetRefreshable());
+
+        #endregion
+
+        #region GetRefreshable
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// GetRefreshable
+        ///
+        /// <summary>
+        /// Information の各種プロパティを更新するためのオブジェクトを
+        /// 取得します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public IRefreshable GetRefreshable() => GetRefreshableCore();
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// GetRefreshableCore
+        ///
+        /// <summary>
+        /// Information の各種プロパティを更新するためのオブジェクトを
+        /// 取得します。
+        /// </summary>
+        ///
+        /// <remarks>
+        /// Refreshable クラスにはオブジェクト毎に保持する状態が存在
+        /// しないため、複数のオブジェクトで Refreshable オブジェクトを
+        /// 共有する事とします。
+        /// </remarks>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected virtual IRefreshable GetRefreshableCore() => _shared ?? (
+            _shared = new Refreshable()
+        );
 
         #endregion
 
@@ -367,6 +408,29 @@ namespace Cube.FileSystem
         /* ----------------------------------------------------------------- */
         public void Delete(string path) =>
             Action(nameof(Delete), () => DeleteCore(path), path);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// TryDelete
+        ///
+        /// <summary>
+        /// ファイルまたはディレクトリの削除を試行します。
+        /// </summary>
+        ///
+        /// <param name="path">削除するファイルのパス</param>
+        ///
+        /// <returns>削除が成功したかどうか</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        public bool TryDelete(string path)
+        {
+            try
+            {
+                DeleteCore(path);
+                return true;
+            }
+            catch { return false; }
+        }
 
         /* ----------------------------------------------------------------- */
         ///
@@ -695,7 +759,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private void CreateDirectory(string path, IInformation src)
+        private void CreateDirectory(string path, Information src)
         {
             CreateDirectory(path);
             SetCreationTime(path, src.CreationTime);
@@ -713,7 +777,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private void CreateParentDirectory(IInformation info)
+        private void CreateParentDirectory(Information info)
         {
             var dir = info.DirectoryName;
             if (!Exists(dir)) CreateDirectory(dir);
@@ -728,7 +792,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private bool CopyDirectory(IInformation src, IInformation dest, bool overwrite)
+        private bool CopyDirectory(Information src, Information dest, bool overwrite)
         {
             if (!dest.Exists) CreateDirectory(dest.FullName, src);
 
@@ -760,7 +824,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private bool CopyFile(IInformation src, IInformation dest, bool overwrite) =>
+        private bool CopyFile(Information src, Information dest, bool overwrite) =>
             Action(nameof(Copy), () =>
             {
                 CreateParentDirectory(dest);
@@ -776,7 +840,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private bool MoveDirectory(IInformation src, IInformation dest, bool overwrite)
+        private bool MoveDirectory(Information src, Information dest, bool overwrite)
         {
             if (!dest.Exists) CreateDirectory(dest.FullName, src);
 
@@ -810,7 +874,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private bool MoveFile(IInformation src, IInformation dest, bool overwrite)
+        private bool MoveFile(Information src, Information dest, bool overwrite)
         {
             if (!overwrite || !dest.Exists) return MoveFile(src, dest);
             else
@@ -834,7 +898,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private bool MoveFile(IInformation src, IInformation dest) =>
+        private bool MoveFile(Information src, Information dest) =>
             Action(nameof(Move), () =>
             {
                 CreateParentDirectory(dest);
@@ -903,6 +967,10 @@ namespace Cube.FileSystem
             }
         }
 
+        #endregion
+
+        #region Fields
+        private static IRefreshable _shared;
         #endregion
     }
 }

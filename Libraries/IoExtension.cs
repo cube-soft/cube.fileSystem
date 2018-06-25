@@ -20,7 +20,7 @@ using Cube.Streams;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Cube.FileSystem.Files
+namespace Cube.FileSystem.Mixin
 {
     /* --------------------------------------------------------------------- */
     ///
@@ -34,6 +34,8 @@ namespace Cube.FileSystem.Files
     public static class IoExtension
     {
         #region Methods
+
+        #region Load
 
         /* ----------------------------------------------------------------- */
         ///
@@ -98,6 +100,10 @@ namespace Cube.FileSystem.Files
             action(e);
             return true;
         }, false);
+
+        #endregion
+
+        #region Save
 
         /* ----------------------------------------------------------------- */
         ///
@@ -170,6 +176,10 @@ namespace Cube.FileSystem.Files
             }
         });
 
+        #endregion
+
+        #region GetTypeName
+
         /* ----------------------------------------------------------------- */
         ///
         /// Save
@@ -210,7 +220,7 @@ namespace Cube.FileSystem.Files
         /// <param name="info">ファイル情報</param>
         ///
         /* ----------------------------------------------------------------- */
-        public static string GetTypeName(this IO io, IInformation info) =>
+        public static string GetTypeName(this IO io, Information info) =>
             GetTypeName(io, info?.FullName);
 
         /* ----------------------------------------------------------------- */
@@ -244,6 +254,10 @@ namespace Cube.FileSystem.Files
             return result != IntPtr.Zero ? dest.szTypeName : null;
         }
 
+        #endregion
+
+        #region GetUniqueName
+
         /* ----------------------------------------------------------------- */
         ///
         /// GetUniqueName
@@ -271,19 +285,62 @@ namespace Cube.FileSystem.Files
         /// <param name="info">ファイル情報</param>
         ///
         /* ----------------------------------------------------------------- */
-        public static string GetUniqueName(this IO io, IInformation info)
+        public static string GetUniqueName(this IO io, Information info)
         {
             if (info == null) return null;
             if (!info.Exists) return info.FullName;
             if (io == null) return null;
 
-            for (var i = 2; ; ++i)
+            for (var i = 0; i < int.MaxValue; ++i)
             {
-                var name = $"{info.NameWithoutExtension}({i}){info.Extension}";
+                var name = $"{info.NameWithoutExtension} ({i + 1}){info.Extension}";
                 var dest = io.Combine(info.DirectoryName, name);
                 if (!io.Exists(dest)) return dest;
             }
+            return info.FullName;
         }
+
+        #endregion
+
+        #region ChangeExtension
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// ChangeExtension
+        ///
+        /// <summary>
+        /// 拡張子を変更します。
+        /// </summary>
+        ///
+        /// <param name="io">ファイル操作用オブジェクト</param>
+        /// <param name="path">ファイルのパス</param>
+        /// <param name="ext">拡張子</param>
+        ///
+        /// <returns>変更後のパス</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static string ChangeExtension(this IO io, string path, string ext) =>
+            ChangeExtension(io, io.Get(path), ext);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// ChangeExtension
+        ///
+        /// <summary>
+        /// 拡張子を変更します。
+        /// </summary>
+        ///
+        /// <param name="io">ファイル操作用オブジェクト</param>
+        /// <param name="info">ファイル情報</param>
+        /// <param name="ext">拡張子</param>
+        ///
+        /// <returns>変更後のパス</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static string ChangeExtension(this IO io, Information info, string ext) =>
+            io.Combine(info.DirectoryName, $"{info.NameWithoutExtension}{ext}");
+
+        #endregion
 
         #endregion
     }

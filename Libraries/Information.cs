@@ -25,11 +25,11 @@ namespace Cube.FileSystem
     /// Information
     ///
     /// <summary>
-    /// 標準ライブラリを利用した IInformation の実装クラスです。
+    /// ファイルまたはディレクトリの情報を保持するためのクラスです。
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
-    public class Information : IInformation
+    public class Information
     {
         #region Constructors
 
@@ -41,17 +41,66 @@ namespace Cube.FileSystem
         /// オブジェクトを初期化します。
         /// </summary>
         ///
-        /// <param name="path">ファイルまたはディレクトリのパス</param>
+        /// <param name="src">ファイルまたはディレクトリのパス</param>
         ///
         /* ----------------------------------------------------------------- */
-        public Information(string path)
+        public Information(string src) : this(src, new Refreshable()) { }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Information
+        ///
+        /// <summary>
+        /// オブジェクトを初期化します。
+        /// </summary>
+        ///
+        /// <param name="src">ファイルまたはディレクトリのパス</param>
+        /// <param name="refreshable">情報更新用オブジェクト</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public Information(string src, IRefreshable refreshable)
         {
-            Reset(path);
+            Core        = new InformationCore(src);
+            Refreshable = refreshable;
+            Refresh();
         }
 
         #endregion
 
         #region Properties
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Core
+        ///
+        /// <summary>
+        /// 内部情報を保持するためのオブジェクトを取得します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected InformationCore Core { get; }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Refreshable
+        ///
+        /// <summary>
+        /// 情報更新用オブジェクトを取得します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public IRefreshable Refreshable { get; }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Source
+        ///
+        /// <summary>
+        /// オリジナルのパスを取得します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public string Source => Core.Source;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -63,7 +112,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool Exists => RawObject.Exists;
+        public bool Exists => Core.Exists;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -74,7 +123,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool IsDirectory => RawObject is DirectoryInfo;
+        public bool IsDirectory => Core.IsDirectory;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -85,7 +134,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Name => RawObject.Name;
+        public string Name => Core.Name;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -96,7 +145,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string NameWithoutExtension => Path.GetFileNameWithoutExtension(Name);
+        public string NameWithoutExtension => Core.NameWithoutExtension;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -107,7 +156,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Extension => RawObject.Extension;
+        public string Extension => Core.Extension;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -118,7 +167,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string FullName => RawObject.FullName;
+        public string FullName => Core.FullName;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -129,8 +178,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string DirectoryName =>
-            TryCast()?.DirectoryName ?? Path.GetDirectoryName(FullName);
+        public string DirectoryName => Core.DirectoryName;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -141,7 +189,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public long Length => TryCast()?.Length ?? 0;
+        public long Length => Core.Length;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -152,7 +200,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public FileAttributes Attributes => RawObject.Attributes;
+        public FileAttributes Attributes => Core.Attributes;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -163,7 +211,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime CreationTime => RawObject.CreationTime;
+        public DateTime CreationTime => Core.CreationTime;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -174,7 +222,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastWriteTime => RawObject.LastWriteTime;
+        public DateTime LastWriteTime => Core.LastWriteTime;
 
         /* ----------------------------------------------------------------- */
         ///
@@ -185,18 +233,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastAccessTime => RawObject.LastAccessTime;
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// RawObject
-        ///
-        /// <summary>
-        /// 実装オブジェクトを取得します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public FileSystemInfo RawObject { get; private set; }
+        public DateTime LastAccessTime => Core.LastAccessTime;
 
         #endregion
 
@@ -211,36 +248,18 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public void Refresh() => Reset(FullName);
-
-        #endregion
-
-        #region Implementations
+        public void Refresh() => OnRefresh();
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Reset
+        /// OnRefresh
         ///
         /// <summary>
-        /// RawObject をリセットします。
+        /// オブジェクトを最新の状態に更新します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private void Reset(string path) =>
-            RawObject = Directory.Exists(path) ?
-                        new DirectoryInfo(path) as FileSystemInfo :
-                        new FileInfo(path) as FileSystemInfo;
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// TryCast
-        ///
-        /// <summary>
-        /// FileInfo オブジェクトへのキャストを施行します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        private FileInfo TryCast() => RawObject as FileInfo;
+        protected virtual void OnRefresh() => Refreshable.Invoke(Core);
 
         #endregion
     }
