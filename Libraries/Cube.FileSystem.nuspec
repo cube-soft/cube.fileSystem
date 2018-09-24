@@ -15,11 +15,11 @@
     <iconUrl>https://github.com/cube-soft/Cube.FileSystem/blob/master/Icon.png?raw=true</iconUrl>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="AlphaFS" version="2.2.1" />
+        <dependency id="AlphaFS" version="2.2.6" />
         <dependency id="Cube.Core" version="1.11.0" />
       </group>
       <group targetFramework="net35">
-        <dependency id="AlphaFS" version="2.2.1" />
+        <dependency id="AlphaFS" version="2.2.6" />
         <dependency id="Cube.Core" version="1.11.0" />
         <dependency id="Cube.Backwards" version="1.5.0" />
       </group>
