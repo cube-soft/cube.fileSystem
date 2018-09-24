@@ -16,8 +16,11 @@
 //
 /* ------------------------------------------------------------------------- */
 using Cube.Log;
-using Cube.Streams;
+using Cube.Net35;
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Cube.FileSystem.Mixin
@@ -52,7 +55,7 @@ namespace Cube.FileSystem.Mixin
         /// <returns>変換結果</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static T Load<T>(this IO io, string src, Func<System.IO.Stream, T> func) =>
+        public static T Load<T>(this IO io, string src, Func<Stream, T> func) =>
             Load(io, src, func, default(T));
 
         /* ----------------------------------------------------------------- */
@@ -66,20 +69,19 @@ namespace Cube.FileSystem.Mixin
         /// <param name="io">入出力用オブジェクト</param>
         /// <param name="src">ファイルのパス</param>
         /// <param name="func">入力ストリームに対する処理</param>
-        /// <param name="err">エラー時に返される値</param>
+        /// <param name="error">エラー時に返される値</param>
         ///
         /// <returns>変換結果</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static T Load<T>(this IO io, string src,
-            Func<System.IO.Stream, T> func, T err) => io.LogWarn(() =>
+        public static T Load<T>(this IO io, string src, Func<Stream, T> func, T error) => io.LogWarn(() =>
         {
             if (io.Exists(src) && io.Get(src).Length > 0)
             {
                 using (var ss = io.OpenRead(src)) return func(ss);
             }
-            return err;
-        }, err);
+            return error;
+        }, error);
 
         /* ----------------------------------------------------------------- */
         ///
@@ -94,8 +96,7 @@ namespace Cube.FileSystem.Mixin
         /// <param name="action">入力ストリームに対する処理</param>
         ///
         /* ----------------------------------------------------------------- */
-        public static void Load(this IO io, string src,
-            Action<System.IO.Stream> action) => io.Load(src, e =>
+        public static void Load(this IO io, string src, Action<Stream> action) => io.Load(src, e =>
         {
             action(e);
             return true;
@@ -162,10 +163,9 @@ namespace Cube.FileSystem.Mixin
         /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
-        public static void Save(this IO io, string dest,
-            Action<System.IO.Stream> action) => io.LogWarn(() =>
+        public static void Save(this IO io, string dest, Action<Stream> action) => io.LogWarn(() =>
         {
-            using (var ss = new System.IO.MemoryStream())
+            using (var ss = new MemoryStream())
             {
                 action(ss);
                 using (var ds = io.Create(dest))
@@ -282,22 +282,23 @@ namespace Cube.FileSystem.Mixin
         /// </summary>
         ///
         /// <param name="io">ファイル操作用オブジェクト</param>
-        /// <param name="info">ファイル情報</param>
+        /// <param name="src">ファイル情報</param>
         ///
         /* ----------------------------------------------------------------- */
-        public static string GetUniqueName(this IO io, Information info)
+        public static string GetUniqueName(this IO io, Information src)
         {
-            if (info == null) return null;
-            if (!info.Exists) return info.FullName;
-            if (io == null) return null;
+            Debug.Assert(io != null);
 
-            for (var i = 0; i < int.MaxValue; ++i)
-            {
-                var name = $"{info.NameWithoutExtension} ({i + 1}){info.Extension}";
-                var dest = io.Combine(info.DirectoryName, name);
-                if (!io.Exists(dest)) return dest;
-            }
-            return info.FullName;
+            if (src == null) return null;
+            if (!src.Exists) return src.FullName;
+
+            var dir  = src.DirectoryName;
+            var name = src.NameWithoutExtension;
+            var ext  = src.Extension;
+
+            return Enumerable.Range(1, int.MaxValue)
+                             .Select(e => io.Combine(dir, $"{name} ({e}){ext}"))
+                             .First(e => !io.Exists(e));
         }
 
         #endregion

@@ -16,6 +16,7 @@
 //
 /* ------------------------------------------------------------------------- */
 using Cube.FileSystem.Mixin;
+using Cube.FileSystem.TestService;
 using NUnit.Framework;
 
 namespace Cube.FileSystem.Tests
@@ -141,25 +142,6 @@ namespace Cube.FileSystem.Tests
             IO.Copy(GetExamplesWith("Sample.txt"), u3);
             var u4 = IO.GetUniqueName(u3); // Not src
             Assert.That(u4, Is.EqualTo(GetResultsWith($"UniqueTest (2) (1).txt")));
-        }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// GetUniqueName_Null
-        ///
-        /// <summary>
-        /// 引数に null を指定した時の挙動を確認します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        [Test]
-        public void GetUniqueName_Null()
-        {
-            var dummy = default(IO);
-            var src   = GetExamplesWith("Sample.txt");
-
-            Assert.That(dummy.GetUniqueName(src), Is.Null);
-            Assert.That(dummy.GetUniqueName(IO.Get(src)), Is.Null);
         }
 
         /* ----------------------------------------------------------------- */

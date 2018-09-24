@@ -15,61 +15,71 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
-using System.Reflection;
+using Cube.Generics;
+using Microsoft.Win32;
 
-namespace Cube.FileSystem.Tests
+namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// FileFixture
+    /// Startup
     ///
     /// <summary>
-    /// ユニットテストでファイルを使用する際の補助クラスです。
+    /// スタートアップ設定を行うためのクラスです。
     /// </summary>
     ///
-    /// <remarks>
-    /// このクラスは、主にユニットテスト用クラスの内部処理で利用されます。
-    /// このクラスを直接オブジェクト化する事はできません。必要なクラスに
-    /// 継承する形で利用して下さい。
-    /// </remarks>
-    ///
     /* --------------------------------------------------------------------- */
-    public abstract class FileFixture
+    public class Startup : ObservableProperty
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// FileFixture
+        /// Startup
         ///
         /// <summary>
         /// オブジェクトを初期化します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected FileFixture() : this(new IO()) { }
+        public Startup() : this(string.Empty, string.Empty, false) { }
 
         /* ----------------------------------------------------------------- */
         ///
-        /// FileFixture
+        /// Startup
         ///
         /// <summary>
         /// オブジェクトを初期化します。
         /// </summary>
         ///
-        /// <param name="io">ファイル操作用オブジェクト</param>
+        /* ----------------------------------------------------------------- */
+        public Startup(string name) : this(name, string.Empty, false) { }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Startup
+        ///
+        /// <summary>
+        /// オブジェクトを初期化します。
+        /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected FileFixture(IO io)
+        public Startup(string name, string command) : this(name, command, true) { }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Startup
+        ///
+        /// <summary>
+        /// オブジェクトを初期化します。
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public Startup(string name, string command, bool enabled)
         {
-            IO       = io;
-            Root     = IO.Get(Assembly.GetExecutingAssembly().Location).DirectoryName;
-            Name     = GetType().FullName;
-            Examples = IO.Combine(Root, nameof(Examples));
-            Results  = IO.Combine(Root, nameof(Results), Name);
-
-            if (!IO.Exists(Results)) IO.CreateDirectory(Results);
-            Delete(Results);
+            Name    = name;
+            Command = command;
+            Enabled = enabled;
         }
 
         #endregion
@@ -78,63 +88,61 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
-        /// IO
+        /// RegistryKeyName
         ///
         /// <summary>
-        /// ファイル操作用オブジェクトを取得します。
+        /// スタートアップ設定を保持するレジストリのルートに当たる
+        /// サブキー名を取得します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected IO IO { get; }
+        public static string RegistryKeyName =>
+            @"Software\Microsoft\Windows\CurrentVersion\Run";
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Root
+        /// Enabled
         ///
         /// <summary>
-        /// テスト用リソースの存在するルートディレクトリへのパスを
-        /// 取得、または設定します。
+        /// スタートアップ設定が有効かどうかを示す値を取得または設定します。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected string Root { get; }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Examples
-        ///
-        /// <summary>
-        /// テスト用ファイルの存在するフォルダへのパスを取得します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected string Examples { get; }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Results
-        ///
-        /// <summary>
-        /// テスト結果を格納するためのフォルダへのパスを取得します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected string Results { get; }
+        public bool Enabled
+        {
+            get => _enabled;
+            set => SetProperty(ref _enabled, value);
+        }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Name
         ///
         /// <summary>
-        /// クラス名を取得します。
+        /// スタートアップに登録する名前を取得または設定します。
         /// </summary>
         ///
-        /// <remarks>
-        /// テスト結果を格納するディレクトリの生成時に使用します。
-        /// </remarks>
+        /* ----------------------------------------------------------------- */
+        public string Name
+        {
+            get => _name;
+            set => SetProperty(ref _name, value);
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Command
+        ///
+        /// <summary>
+        /// スタートアップ時に実行されるコマンドを取得または設定します。
+        /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected string Name { get; }
+        public string Command
+        {
+            get => _command;
+            set => SetProperty(ref _command, value);
+        }
 
         #endregion
 
@@ -142,37 +150,46 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
-        /// GetExamplesWith
+        /// Load
         ///
         /// <summary>
-        /// 指定されたパス一覧の先頭に Examples ディレクトリのパスを結合
-        /// した結果を取得します。
+        /// レジストリから設定をロードします。
         /// </summary>
         ///
-        /// <param name="paths">結合パス一覧</param>
-        ///
-        /// <returns>結合結果</returns>
-        ///
         /* ----------------------------------------------------------------- */
-        protected string GetExamplesWith(params string[] paths) =>
-            IO.Combine(Examples, IO.Combine(paths));
+        public void Load()
+        {
+            if (!Name.HasValue()) return;
+
+            using (var subkey = Open(false))
+            {
+                Command = subkey.GetValue(Name, string.Empty) as string;
+                Enabled = Command.HasValue();
+            }
+        }
 
         /* ----------------------------------------------------------------- */
         ///
-        /// GetResultsWith
+        /// Save
         ///
         /// <summary>
-        /// 指定されたパス一覧の先頭に Results ディレクトリのパスを結合
-        /// した結果を取得します。
+        /// レジストリへ設定を保存します。
         /// </summary>
         ///
-        /// <param name="paths">結合パス一覧</param>
-        ///
-        /// <returns>結合結果</returns>
-        ///
         /* ----------------------------------------------------------------- */
-        protected string GetResultsWith(params string[] paths) =>
-            IO.Combine(Results, IO.Combine(paths));
+        public void Save()
+        {
+            if (!Name.HasValue()) return;
+
+            using (var subkey = Open(true))
+            {
+                if (Enabled)
+                {
+                    if (Command.HasValue()) subkey.SetValue(Name, Command);
+                }
+                else subkey.DeleteValue(Name, false);
+            }
+        }
 
         #endregion
 
@@ -180,24 +197,22 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Delete
+        /// Open
         ///
         /// <summary>
-        /// 指定されたフォルダ内に存在する全てのファイルおよびフォルダを
-        /// 削除します。
+        /// ルートキーを開きます。
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private void Delete(string directory)
-        {
-            foreach (string f in IO.GetFiles(directory)) IO.Delete(f);
-            foreach (string d in IO.GetDirectories(directory))
-            {
-                Delete(d);
-                IO.Delete(d);
-            }
-        }
+        private RegistryKey Open(bool writable) =>
+            Registry.CurrentUser.OpenSubKey(RegistryKeyName, writable);
 
+        #endregion
+
+        #region Fields
+        private bool _enabled = false;
+        private string _name = string.Empty;
+        private string _command = string.Empty;
         #endregion
     }
 }

@@ -15,8 +15,8 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
+using Cube.FileSystem.TestService;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -50,12 +50,16 @@ namespace Cube.FileSystem.Tests
         {
             var src  = GetResultsWith(name);
             var dest = GetLinkPath(link);
-            var sc   = new Shortcut(src)
+            var sc   = new Shortcut
             {
-                Link         = dest,
+                FullName     = src,
+                Target       = dest,
                 Arguments    = args,
                 IconLocation = $"{dest},{index}",
             };
+
+            Assert.That(sc.FullName, Does.EndWith(".lnk"));
+            Assert.That(IO.Get(sc.FullName).NameWithoutExtension, Does.Not.EndWith(".lnk"));
 
             sc.Create();
             return sc.Exists;
@@ -73,9 +77,10 @@ namespace Cube.FileSystem.Tests
         [Test]
         public void Create_Empty()
         {
-            var sc = new Shortcut(GetResultsWith("ScEmpty"))
+            var sc = new Shortcut
             {
-                Link         = string.Empty,
+                FullName     = GetResultsWith("ScEmpty"),
+                Target       = string.Empty,
                 Arguments    = null,
                 IconLocation = string.Empty,
             };
@@ -83,19 +88,6 @@ namespace Cube.FileSystem.Tests
             sc.Create();
             Assert.That(sc.Exists, Is.False);
         }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Create_Throw
-        ///
-        /// <summary>
-        /// 空文字を指定した時に例外が送出される事を確認します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        [Test]
-        public void Create_Throw() =>
-            Assert.That(() => new Shortcut(""), Throws.TypeOf<ArgumentException>());
 
         /* ----------------------------------------------------------------- */
         ///
@@ -111,9 +103,10 @@ namespace Cube.FileSystem.Tests
         {
             var src  = GetResultsWith("DeleteTest");
             var dest = GetLinkPath("Cube.FileSystem.dll");
-            var sc   = new Shortcut(src)
+            var sc   = new Shortcut
             {
-                Link         = dest,
+                FullName     = src,
+                Target       = dest,
                 Arguments    = null,
                 IconLocation = dest,
             };
@@ -125,6 +118,45 @@ namespace Cube.FileSystem.Tests
             sc.Delete(); // ignore
             Assert.That(sc.Exists, Is.False);
         }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Resolve
+        ///
+        /// <summary>
+        /// Tests the Resolve method.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [Test]
+        public void Resolve()
+        {
+            var src  = GetResultsWith("ResolveTest");
+            var dest = GetLinkPath("Cube.FileSystem.dll");
+            var sc0  = new Shortcut
+            {
+                FullName     = src,
+                Target       = dest,
+                Arguments    = null,
+                IconLocation = dest,
+            };
+
+            sc0.Create();
+            Assert.That(sc0.Exists, Is.True);
+            Assert.That(Shortcut.Resolve(src).Target, Is.EqualTo(dest));
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Resolve_Error
+        ///
+        /// <summary>
+        /// Tests to confirm the result with the non-existent link path.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [Test]
+        public void Resolve_Error() => Assert.That(Shortcut.Resolve("dummy"), Is.Null);
 
         #endregion
 

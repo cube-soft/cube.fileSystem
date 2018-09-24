@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Cube.FileSystem</id>
-    <version>1.10.0</version>
+    <version>1.11.0</version>
     <title>Cube.FileSystem</title>
     <authors>CubeSoft</authors>
     <owners>CubeSoft</owners>
@@ -16,12 +16,12 @@
     <dependencies>
       <group targetFramework="net45">
         <dependency id="AlphaFS" version="2.2.1" />
-        <dependency id="Cube.Core" version="1.10.0" />
+        <dependency id="Cube.Core" version="1.11.0" />
       </group>
       <group targetFramework="net35">
         <dependency id="AlphaFS" version="2.2.1" />
-        <dependency id="Cube.Core" version="1.10.0" />
-        <dependency id="Cube.Backwards" version="1.4.1" />
+        <dependency id="Cube.Core" version="1.11.0" />
+        <dependency id="Cube.Backwards" version="1.5.0" />
       </group>
     </dependencies>
   </metadata>
