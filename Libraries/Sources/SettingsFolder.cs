@@ -32,11 +32,11 @@ namespace Cube.FileSystem
     /// SettingsFolder(T)
     ///
     /// <summary>
-    /// ユーザ設定を保持するためのクラスです。
+    /// Provides functionality to load and save user settings.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
-    public class SettingsFolder<T> : IDisposable, INotifyPropertyChanged
+    public class SettingsFolder<T> : DisposableBase, INotifyPropertyChanged
         where T : INotifyPropertyChanged, new()
     {
         #region Constructors
@@ -46,25 +46,12 @@ namespace Cube.FileSystem
         /// SettingsFolder(T)
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the SettingsFolder class with
+        /// the specified arguments.
         /// </summary>
         ///
-        /// <param name="assembly">アセンブリ情報</param>
-        ///
-        /* ----------------------------------------------------------------- */
-        public SettingsFolder(Assembly assembly) :
-            this(assembly, Format.Registry) { }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// SettingsFolder(T)
-        ///
-        /// <summary>
-        /// オブジェクトを初期化します。
-        /// </summary>
-        ///
-        /// <param name="assembly">アセンブリ情報</param>
-        /// <param name="format">設定情報の保存方法</param>
+        /// <param name="assembly">Assembly information.</param>
+        /// <param name="format">Serialization format.</param>
         ///
         /* ----------------------------------------------------------------- */
         public SettingsFolder(Assembly assembly, Format format) :
@@ -75,17 +62,17 @@ namespace Cube.FileSystem
         /// SettingsFolder(T)
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the SettingsFolder class with
+        /// the specified arguments.
         /// </summary>
         ///
-        /// <param name="assembly">アセンブリ情報</param>
-        /// <param name="format">設定情報の保存方法</param>
-        /// <param name="io">I/O オブジェクト</param>
+        /// <param name="assembly">Assembly information.</param>
+        /// <param name="format">Serialization format.</param>
+        /// <param name="io">I/O handler.</param>
         ///
         /* ----------------------------------------------------------------- */
         public SettingsFolder(Assembly assembly, Format format, IO io)
         {
-            _dispose = new OnceAction<bool>(Dispose);
             Initialize(format, assembly.GetReader(), io);
         }
 
@@ -94,27 +81,13 @@ namespace Cube.FileSystem
         /// SettingsFolder(T)
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the SettingsFolder class with
+        /// the specified arguments.
         /// </summary>
         ///
-        /// <param name="assembly">アセンブリ情報</param>
-        /// <param name="location">設定情報の保存場所</param>
-        ///
-        /* ----------------------------------------------------------------- */
-        public SettingsFolder(Assembly assembly, string location) :
-            this(assembly, Format.Registry, location) { }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// SettingsFolder(T)
-        ///
-        /// <summary>
-        /// オブジェクトを初期化します。
-        /// </summary>
-        ///
-        /// <param name="assembly">アセンブリ情報</param>
-        /// <param name="format">設定情報の保存形式</param>
-        /// <param name="location">設定情報の保存場所</param>
+        /// <param name="assembly">Assembly information.</param>
+        /// <param name="format">Serialization format.</param>
+        /// <param name="location">Saved data location.</param>
         ///
         /* ----------------------------------------------------------------- */
         public SettingsFolder(Assembly assembly, Format format, string location) :
@@ -125,18 +98,18 @@ namespace Cube.FileSystem
         /// SettingsFolder(T)
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the SettingsFolder class with
+        /// the specified arguments.
         /// </summary>
         ///
-        /// <param name="assembly">アセンブリ情報</param>
-        /// <param name="format">設定情報の保存形式</param>
-        /// <param name="location">設定情報の保存場所</param>
-        /// <param name="io">I/O オブジェクト</param>
+        /// <param name="assembly">Assembly information.</param>
+        /// <param name="format">Serialization format.</param>
+        /// <param name="location">Saved data location.</param>
+        /// <param name="io">I/O handler.</param>
         ///
         /* ----------------------------------------------------------------- */
         public SettingsFolder(Assembly assembly, Format format, string location, IO io)
         {
-            _dispose = new OnceAction<bool>(Dispose);
             Initialize(format, location, assembly.GetReader(), io);
         }
 
@@ -149,7 +122,7 @@ namespace Cube.FileSystem
         /// Value
         ///
         /// <summary>
-        /// 設定内容を取得します。
+        /// Gets the user settings.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -157,10 +130,32 @@ namespace Cube.FileSystem
 
         /* ----------------------------------------------------------------- */
         ///
+        /// Assembly
+        ///
+        /// <summary>
+        /// Gets the assembly information.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public AssemblyReader Assembly { get; private set; }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Version
+        ///
+        /// <summary>
+        /// Gets the software versioin.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public SoftwareVersion Version { get; private set; }
+
+        /* ----------------------------------------------------------------- */
+        ///
         /// Format
         ///
         /// <summary>
-        /// 設定情報の保存形式を取得または設定します。
+        /// Gets or sets the serialization format.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -171,7 +166,7 @@ namespace Cube.FileSystem
         /// Location
         ///
         /// <summary>
-        /// 設定情報の保存場所を取得または設定します。
+        /// Gets or sets the location that the serialized data is saved in.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -182,7 +177,7 @@ namespace Cube.FileSystem
         /// IO
         ///
         /// <summary>
-        /// I/O オブジェクトを取得します。
+        /// Gets the I/O handler.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -190,55 +185,11 @@ namespace Cube.FileSystem
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Version
-        ///
-        /// <summary>
-        /// バージョン情報を取得または設定します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public SoftwareVersion Version { get; private set; }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Company
-        ///
-        /// <summary>
-        /// アプリケーションの発行者を取得または設定します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public string Company { get; private set; }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Product
-        ///
-        /// <summary>
-        /// アプリケーション名を取得または設定します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public string Product { get; private set; }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Startup
-        ///
-        /// <summary>
-        /// スタートアップ設定を取得します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public Startup Startup { get; } = new Startup();
-
-        /* ----------------------------------------------------------------- */
-        ///
         /// AutoSave
         ///
         /// <summary>
-        /// ユーザ毎の設定を自動的に保存するかどうかを示す値を取得または
-        /// 設定します。
+        /// Gets or sets the value indicating whether saving automatically
+        /// when user settings are changed.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -249,7 +200,8 @@ namespace Cube.FileSystem
         /// AutoSaveDelay
         ///
         /// <summary>
-        /// 自動的保存の実行遅延時間を取得または設定します。
+        /// Gets or sets the delay between detecting changed in user
+        /// settings and saving them.
         /// </summary>
         ///
         /// <remarks>
@@ -272,7 +224,7 @@ namespace Cube.FileSystem
         /// PropertyChanged
         ///
         /// <summary>
-        /// プロパティの内容が変更された時に発生するイベントです。
+        /// Occurs when properties are changed.
         /// </summary>
         ///
         /// <remarks>
@@ -288,7 +240,7 @@ namespace Cube.FileSystem
         /// OnPropertyChanged
         ///
         /// <summary>
-        /// PropertyChangd イベントを発生させます。
+        /// Raises the PropertyChanged event.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -304,7 +256,7 @@ namespace Cube.FileSystem
         /// Loaded
         ///
         /// <summary>
-        /// 読み込み時に発生するイベントです。
+        /// Occurs when user settings is loaded from the provided location.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -315,7 +267,7 @@ namespace Cube.FileSystem
         /// OnLoaded
         ///
         /// <summary>
-        /// Loaded イベントを発生させます。
+        /// Raises the Loaded event.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -336,7 +288,7 @@ namespace Cube.FileSystem
         /// Saved
         ///
         /// <summary>
-        /// 自動保存機能が実行された時に発生するイベントです。
+        /// Occurs when user settings is saved to the provided location.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -347,7 +299,7 @@ namespace Cube.FileSystem
         /// OnSaved
         ///
         /// <summary>
-        /// Saved イベントを発生させます。
+        /// Raises the Saved event.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -355,8 +307,6 @@ namespace Cube.FileSystem
         {
             if (e.Key == Format.Registry) e.Key.Serialize(e.Value, Value);
             else IO.Save(e.Value, ss => e.Key.Serialize(ss, Value));
-
-            Startup.Save();
             Saved?.Invoke(this, e);
         }
 
@@ -371,82 +321,37 @@ namespace Cube.FileSystem
         /// Load
         ///
         /// <summary>
-        /// ユーザ設定を読み込みます。
+        /// Loads user settings.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public void Load() => LoadOrDefault(default(T));
+        public void Load() => OnLoaded(ValueChangedEventArgs.Create(Value, LoadCore()));
 
         /* ----------------------------------------------------------------- */
         ///
         /// LoadOrDefault
         ///
         /// <summary>
-        /// ユーザ設定を読み込みます。
+        /// Loads user settings or uses the specified value.
         /// </summary>
         ///
-        /// <param name="alternate">失敗時に適用する値</param>
+        /// <param name="error">Used when an exception occurs.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public void LoadOrDefault(T alternate) =>
-            OnLoaded(ValueChangedEventArgs.Create(Value, LoadCore(alternate)));
+        public void LoadOrDefault(T error) => OnLoaded(ValueChangedEventArgs.Create(
+            Value, this.LogWarn(() => LoadCore(), error)
+        ));
 
         /* ----------------------------------------------------------------- */
         ///
         /// Save
         ///
         /// <summary>
-        /// ユーザ設定をレジストリへ保存します。
+        /// Saves user settings.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public void Save() =>
-            OnSaved(KeyValueEventArgs.Create(Format, Location));
-
-        #region IDisposable
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// ~SettingsFolder
-        ///
-        /// <summary>
-        /// オブジェクトを破棄します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        ~SettingsFolder() { _dispose.Invoke(false); }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Dispose
-        ///
-        /// <summary>
-        /// リソースを破棄します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public void Dispose()
-        {
-            _dispose.Invoke(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Dispose
-        ///
-        /// <summary>
-        /// リソースを破棄します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing) _autosaver.Dispose();
-            if (AutoSave) Save();
-        }
-
-        #endregion
+        public void Save() => OnSaved(KeyValueEventArgs.Create(Format, Location));
 
         #endregion
 
@@ -454,10 +359,31 @@ namespace Cube.FileSystem
 
         /* ----------------------------------------------------------------- */
         ///
+        /// Dispose
+        ///
+        /// <summary>
+        /// Releases the unmanaged resources used by the SettingsFolder
+        /// and optionally releases the managed resources.
+        /// </summary>
+        ///
+        /// <param name="disposing">
+        /// true to release both managed and unmanaged resources;
+        /// false to release only unmanaged resources.
+        /// </param>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _autosaver.Dispose();
+            if (AutoSave) this.LogWarn(() => Save());
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
         /// Initialize
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes properties and fields of the SettingsFolder class.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -466,7 +392,7 @@ namespace Cube.FileSystem
             var root = fmt != Format.Registry ?
                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) :
                        string.Empty;
-            var path = io.Combine(root, $@"{asm.Company}\{asm.Product}");
+            var path = io.Combine(root, asm.Company, asm.Product);
 
             Initialize(fmt, path, asm, io);
         }
@@ -476,24 +402,23 @@ namespace Cube.FileSystem
         /// Initialize
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes properties and fields of the SettingsFolder class.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
         private void Initialize(Format fmt, string path, AssemblyReader asm, IO io)
         {
+            Assembly = asm;
+            IO       = io;
             Format   = fmt;
             Location = path;
-            IO       = io;
             Version  = new SoftwareVersion(asm.Assembly);
-            Company  = asm.Company;
-            Product  = asm.Product;
 
             Value = new T();
             Value.PropertyChanged += WhenChanged;
 
             _autosaver.AutoReset = false;
-            _autosaver.Elapsed += (s, e) => TaskEx.Run(() => Save()).Forget();
+            _autosaver.Elapsed += (s, e) => TaskEx.Run(() => this.LogWarn(() => Save())).Forget();
         }
 
         /* ----------------------------------------------------------------- */
@@ -501,32 +426,22 @@ namespace Cube.FileSystem
         /// LoadCore
         ///
         /// <summary>
-        /// 設定情報を読み込みます。
+        /// Loads user settings.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        private T LoadCore(T error)
-        {
-            try
-            {
-                return Format == Format.Registry ?
-                       Format.Deserialize<T>(Location) :
-                       IO.Load(Location, ss => Format.Deserialize<T>(ss), error);
-            }
-            catch (Exception err)
-            {
-                this.LogWarn(err.ToString(), err);
-                return error;
-            }
-        }
+        private T LoadCore() =>
+            Format == Format.Registry ?
+            Format.Deserialize<T>(Location) :
+            IO.Load(Location, e => Format.Deserialize<T>(e));
 
         /* ----------------------------------------------------------------- */
         ///
         /// WhenChanged
         ///
         /// <summary>
-        /// Value.PropertyChanged イベントが発生した時に実行される
-        /// ハンドラです。
+        /// Occurs when the PropertyChanged event of the Value property
+        /// is fired.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -542,7 +457,7 @@ namespace Cube.FileSystem
                     _autosaver.Interval = AutoSaveDelay.TotalMilliseconds;
                     _autosaver.Start();
                 }
-                else Save();
+                else this.LogWarn(() => Save());
             }
             finally { OnPropertyChanged(e); }
         }
@@ -550,7 +465,6 @@ namespace Cube.FileSystem
         #endregion
 
         #region Fields
-        private readonly OnceAction<bool> _dispose;
         private readonly Timer _autosaver = new Timer();
         #endregion
     }

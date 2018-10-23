@@ -22,34 +22,31 @@ namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// InformationCore
+    /// RefreshableInfo
     ///
     /// <summary>
-    /// ファイルまたはディレクトリの情報を保持するためのクラスです。
+    /// Represents information for the IRefreshable interface.
     /// </summary>
     ///
-    /// <remarks>
-    /// このクラスは通常 Information オブジェクトの内部情報を
-    /// RefreshController 経由で更新する際に使用されます。
-    /// </remarks>
-    ///
     /* --------------------------------------------------------------------- */
-    public class InformationCore
+    [Serializable]
+    public class RefreshableInfo
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Information
+        /// RefreshableInfo
         ///
         /// <summary>
-        /// オブジェクトを初期化します。
+        /// Initializes a new instance of the RefreshableInfo class
+        /// with the specified path.
         /// </summary>
         ///
-        /// <param name="src">ファイルまたはディレクトリのパス</param>
+        /// <param name="src">Path of the file or directory.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public InformationCore(string src)
+        internal RefreshableInfo(string src)
         {
             Source = src;
         }
@@ -63,7 +60,7 @@ namespace Cube.FileSystem
         /// Source
         ///
         /// <summary>
-        /// オリジナルのパスを取得します。
+        /// Gets the original path.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -74,8 +71,7 @@ namespace Cube.FileSystem
         /// Exists
         ///
         /// <summary>
-        /// ファイルまたはディレクトリが存在するかどうかを示す値を取得
-        /// または設定します。
+        /// Gets or sets the value indicating whether the Source exists.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -86,7 +82,8 @@ namespace Cube.FileSystem
         /// IsDirectory
         ///
         /// <summary>
-        /// ディレクトリかどうかを示す値を取得または設定します。
+        /// Gets or sets the value indicating whether the Source is
+        /// directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -97,7 +94,7 @@ namespace Cube.FileSystem
         /// Name
         ///
         /// <summary>
-        /// ファイル名を取得または設定します。
+        /// Gets or sets the filename.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -108,7 +105,7 @@ namespace Cube.FileSystem
         /// NameWithoutExtension
         ///
         /// <summary>
-        /// 拡張子を除いたファイル名を取得または設定します。
+        /// Gets or sets the filename without extension.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -119,7 +116,7 @@ namespace Cube.FileSystem
         /// Extension
         ///
         /// <summary>
-        /// 拡張子を取得または設定します。
+        /// Gets or sets the extension.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -130,7 +127,7 @@ namespace Cube.FileSystem
         /// FullName
         ///
         /// <summary>
-        /// 完全なパスを取得または設定します。
+        /// Gets or sets the full path.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -141,8 +138,7 @@ namespace Cube.FileSystem
         /// DirectoryName
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの親ディレクトリのパスを取得または
-        /// 設定します。
+        /// Gets or sets the directory name.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -153,7 +149,7 @@ namespace Cube.FileSystem
         /// Length
         ///
         /// <summary>
-        /// ファイルサイズを取得または設定します。
+        /// Gets or sets the filesize.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -164,7 +160,7 @@ namespace Cube.FileSystem
         /// Attributes
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの属性を取得または設定します。
+        /// Gets or sets the attributes of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -175,7 +171,7 @@ namespace Cube.FileSystem
         /// CreationTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの作成日時を取得または設定します。
+        /// Gets or sets the creation time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -186,7 +182,7 @@ namespace Cube.FileSystem
         /// LastWriteTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの最終更新日時を取得または設定します。
+        /// Gets or sets the last written time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -197,8 +193,7 @@ namespace Cube.FileSystem
         /// LastAccessTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの最終アクセス日時を取得または
-        /// 設定します。
+        /// Gets or sets the last accessed time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */

@@ -32,10 +32,6 @@ namespace Cube.FileSystem
     /* --------------------------------------------------------------------- */
     public class IO
     {
-        #region Properties
-
-        #endregion
-
         #region Methods
 
         #region Get
@@ -105,9 +101,8 @@ namespace Cube.FileSystem
         /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
-        protected virtual IRefreshable GetRefreshableCore() => _shared ?? (
-            _shared = new Refreshable()
-        );
+        protected virtual IRefreshable GetRefreshableCore() =>
+            _shared ?? (_shared = new Refreshable());
 
         #endregion
 

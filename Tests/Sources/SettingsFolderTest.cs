@@ -24,10 +24,10 @@ namespace Cube.FileSystem.Tests
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// SettingsTest
+    /// SettingsFolderTest
     ///
     /// <summary>
-    /// Settings のテスト用クラスです。
+    /// Tests for the SettingsFolder class.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -38,54 +38,34 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Create_Registry
+        /// Create
         ///
         /// <summary>
-        /// SettingsFolder を規定値で初期化するテストを実行します。
+        /// Executes the test for creating a new instance of the
+        /// SettingsFolder class with the specified format.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        [Test]
-        public void Create_Registry()
+        [TestCase(Format.Registry)]
+        [TestCase(Format.Json    )]
+        [TestCase(Format.Xml     )]
+        public void Create(Format format)
         {
             var count = 0;
-            var dest = new SettingsFolder<Person>(Assembly);
+            var dest  = new SettingsFolder<Person>(Assembly, format);
+
             dest.Loaded += (s, e) => ++count;
-            dest.Load();
+            dest.LoadOrDefault(new Person());
 
-            Assert.That(count,                   Is.EqualTo(1));
-            Assert.That(dest.Format,             Is.EqualTo(Format.Registry));
-            Assert.That(dest.Location,           Does.StartWith("CubeSoft"));
-            Assert.That(dest.Location,           Does.EndWith("Cube.FileSystem.Tests"));
-            Assert.That(dest.Company,            Is.EqualTo("CubeSoft"));
-            Assert.That(dest.Product,            Is.EqualTo("Cube.FileSystem.Tests"));
-            Assert.That(dest.Version.ToString(), Is.EqualTo("1.11.0.0"));
-            Assert.That(dest.Value,              Is.Not.Null);
-        }
+            Assert.That(count,         Is.EqualTo(1));
+            Assert.That(dest.Value,    Is.Not.Null);
+            Assert.That(dest.Version,  Is.EqualTo(new SoftwareVersion("1.12.0.0")));
+            Assert.That(dest.Format,   Is.EqualTo(format));
+            Assert.That(dest.Location, Does.EndWith("Cube.FileSystem.Tests"));
 
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Create_Json
-        ///
-        /// <summary>
-        /// SettingsFolder に SettingsType.Json 指定して初期化する
-        /// テストを実行します。
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        [Test]
-        public void Create_Json()
-        {
-            var dest = new SettingsFolder<Person>(Assembly, Format.Json);
-            var root = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
-            Assert.That(dest.Format,             Is.EqualTo(Format.Json));
-            Assert.That(dest.Location,           Does.StartWith(root));
-            Assert.That(dest.Location,           Does.EndWith("Cube.FileSystem.Tests"));
-            Assert.That(dest.Company,            Is.EqualTo("CubeSoft"));
-            Assert.That(dest.Product,            Is.EqualTo("Cube.FileSystem.Tests"));
-            Assert.That(dest.Version.ToString(), Is.EqualTo("1.11.0.0"));
-            Assert.That(dest.Value,              Is.Not.Null);
+            var asm = dest.Assembly;
+            Assert.That(asm.Company,   Is.EqualTo("CubeSoft"));
+            Assert.That(asm.Product,   Is.EqualTo("Cube.FileSystem.Tests"));
         }
 
         /* ----------------------------------------------------------------- */
@@ -93,7 +73,7 @@ namespace Cube.FileSystem.Tests
         /// Load
         ///
         /// <summary>
-        /// レジストリから設定を読み込むテストを実行します。
+        /// Executes the test for loading from registry.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -132,28 +112,43 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
+        /// Load_Throws
+        ///
+        /// <summary>
+        /// Confirms the behavior when the specified file does not exist.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [TestCase(Format.Json)]
+        [TestCase(Format.Xml )]
+        public void Load_Throws(Format format) => Assert.That(
+            () => new SettingsFolder<Person>(Assembly, format).Load(),
+            Throws.InstanceOf<System.IO.IOException>()
+        );
+
+        /* ----------------------------------------------------------------- */
+        ///
         /// ReLoad
         ///
         /// <summary>
-        /// レジストリから設定を 2 回以上読み込むテストを実行します。
+        /// Executes the test for loading twice.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
         [Test]
         public void ReLoad()
         {
-            var save = 0;
-            var fmt  = Format.Registry;
-            var name = GetKeyName(Default);
-            var src  = new SettingsFolder<Person>(Assembly, fmt, name);
+            var count = 0;
+            var name  = GetKeyName(Default);
+            var src   = new SettingsFolder<Person>(Assembly, Format.Registry, name);
 
-            src.Loaded += (s, e) => ++save;
+            src.Loaded += (s, e) => ++count;
             src.AutoSave = false;
             src.Load();
             src.Value.Name = "Before ReLoad";
             src.Load();
 
-            Assert.That(save, Is.EqualTo(2), "Saved");
+            Assert.That(count, Is.EqualTo(2), nameof(src.Loaded));
             Assert.That(src.Value.Name, Is.EqualTo("山田太郎"));
         }
 
@@ -162,21 +157,20 @@ namespace Cube.FileSystem.Tests
         /// AutoSave
         ///
         /// <summary>
-        /// 自動保存機能のテストを実行します。
+        /// Executes the test for automatically saving the settings.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
         [Test]
         public void AutoSave()
         {
-            var fmt    = Format.Registry;
             var key    = nameof(AutoSave);
             var name   = GetKeyName(key);
             var save   = 0;
             var change = 0;
             var delay  = TimeSpan.FromMilliseconds(100);
 
-            using (var src = new SettingsFolder<Person>(Assembly, fmt, name))
+            using (var src = new SettingsFolder<Person>(Assembly, Format.Registry, name))
             {
                 src.Saved           += (s, e) => ++save;
                 src.PropertyChanged += (s, e) => ++change;

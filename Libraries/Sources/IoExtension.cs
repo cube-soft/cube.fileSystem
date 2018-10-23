@@ -15,10 +15,10 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
+using Cube.Generics;
 using Cube.Log;
 using Cube.Net35;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -30,7 +30,7 @@ namespace Cube.FileSystem.Mixin
     /// IoExtension
     ///
     /// <summary>
-    /// Cube.FileSystem.IO に対する拡張用クラスです。
+    /// Provides extended methods for the IO class.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -38,73 +38,69 @@ namespace Cube.FileSystem.Mixin
     {
         #region Methods
 
-        #region Load
-
         /* ----------------------------------------------------------------- */
         ///
         /// Load
         ///
         /// <summary>
-        /// ファイルを開いて内容を読み込みます。
+        /// Creates a new stream from the specified file and executes
+        /// the specified callback.
         /// </summary>
         ///
-        /// <param name="io">入出力用オブジェクト</param>
-        /// <param name="src">ファイルのパス</param>
-        /// <param name="func">入力ストリームに対する処理</param>
+        /// <param name="io">I/O handler.</param>
+        /// <param name="src">Path of the source file.</param>
+        /// <param name="callback">User action.</param>
         ///
-        /// <returns>変換結果</returns>
-        ///
-        /* ----------------------------------------------------------------- */
-        public static T Load<T>(this IO io, string src, Func<Stream, T> func) =>
-            Load(io, src, func, default(T));
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Load
-        ///
-        /// <summary>
-        /// ファイルを開いて内容を読み込みます。
-        /// </summary>
-        ///
-        /// <param name="io">入出力用オブジェクト</param>
-        /// <param name="src">ファイルのパス</param>
-        /// <param name="func">入力ストリームに対する処理</param>
-        /// <param name="error">エラー時に返される値</param>
-        ///
-        /// <returns>変換結果</returns>
+        /// <returns>Executed result.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static T Load<T>(this IO io, string src, Func<Stream, T> func, T error) => io.LogWarn(() =>
+        public static T Load<T>(this IO io, string src, Func<Stream, T> callback)
         {
-            if (io.Exists(src) && io.Get(src).Length > 0)
-            {
-                using (var ss = io.OpenRead(src)) return func(ss);
-            }
-            return error;
-        }, error);
+            using (var ss = io.OpenRead(src)) return callback(ss);
+        }
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Load
+        /// LoadOrDefault
         ///
         /// <summary>
-        /// ファイルを開いて内容を読み込みます。
+        /// Creates a new stream from the specified file and executes
+        /// the specified callback. When an exception occurs, returns
+        /// the specified object.
         /// </summary>
         ///
-        /// <param name="io">入出力用オブジェクト</param>
-        /// <param name="src">ファイルのパス</param>
-        /// <param name="action">入力ストリームに対する処理</param>
+        /// <param name="io">I/O handler.</param>
+        /// <param name="src">Path of the reading file.</param>
+        /// <param name="callback">User action.</param>
+        /// <param name="error">
+        /// Returned object when an exception occurs.
+        /// </param>
+        ///
+        /// <returns>Executed result.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public static void Load(this IO io, string src, Action<Stream> action) => io.Load(src, e =>
+        public static T LoadOrDefault<T>(this IO io, string src, Func<Stream, T> callback, T error) =>
+            io.LogWarn(() => io.Load(src, callback), error);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Load35
+        ///
+        /// <summary>
+        /// Creates a new stream from the specified file and executes
+        /// the specified callback.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// .NET 3.5 専用の拡張メソッドです。
+        /// </remarks>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static T Load35<T>(this IO io, string src, Func<TextReader, T> callback)
         {
-            action(e);
-            return true;
-        }, false);
-
-        #endregion
-
-        #region Save
+            var code = System.Text.Encoding.UTF8;
+            using (var ss = new StreamReader(io.OpenRead(src), code)) return callback(ss);
+        }
 
         /* ----------------------------------------------------------------- */
         ///
@@ -119,94 +115,69 @@ namespace Cube.FileSystem.Mixin
         /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
-        public static T LoadEx<T>(this IO io, string src,
-            Func<System.IO.TextReader, T> func, T error = default(T)) => io.LogWarn(() =>
-        {
-            if (io.Exists(src) && io.Get(src).Length > 0)
-            {
-                var code = System.Text.Encoding.UTF8;
-                using (var ss = new System.IO.StreamReader(io.OpenRead(src), code)) return func(ss);
-            }
-            return error;
-        }, error);
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// LoadEx
-        ///
-        /// <summary>
-        /// ファイルを開いて内容を読み込みます。
-        /// </summary>
-        ///
-        /// <remarks>
-        /// .NET 3.5 専用の拡張メソッドです。
-        /// </remarks>
-        ///
-        /* ----------------------------------------------------------------- */
-        public static void LoadEx(this IO io, string src,
-            Action<System.IO.TextReader> action) => io.LoadEx(src, e =>
-        {
-            action(e);
-            return true;
-        }, false);
+        public static T LoadOrDefault35<T>(this IO io, string src, Func<TextReader, T> callback, T error) =>
+            io.LogWarn(() => io.Load35(src, callback), error);
 
         /* ----------------------------------------------------------------- */
         ///
         /// Save
         ///
         /// <summary>
-        /// ファイルに保存します。
+        /// Creates a new memory stream, executes the specified callback,
+        /// and writes the result to the specified file.
         /// </summary>
         ///
-        /// <remarks>
-        /// .NET 3.5 専用の拡張メソッドです。
-        /// </remarks>
+        /// <param name="io">I/O handler.</param>
+        /// <param name="dest">Path of the writing file.</param>
+        /// <param name="callback">User action.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public static void Save(this IO io, string dest, Action<Stream> action) => io.LogWarn(() =>
+        public static void Save(this IO io, string dest, Action<Stream> callback)
         {
             using (var ss = new MemoryStream())
             {
-                action(ss);
+                callback(ss);
                 using (var ds = io.Create(dest))
                 {
                     ss.Position = 0;
                     ss.CopyTo(ds);
                 }
             }
-        });
-
-        #endregion
-
-        #region GetTypeName
+        }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Save
         ///
         /// <summary>
-        /// ファイルに保存します。
+        /// Creates a new memory stream, executes the specified callback,
+        /// and writes the result to the specified file.
         /// </summary>
         ///
-        /// <param name="io">入出力用オブジェクト</param>
-        /// <param name="dest">ファイルのパス</param>
-        /// <param name="action">出力ストリームに対する処理</param>
+        /// <param name="io">I/O handler.</param>
+        /// <param name="dest">Path of the writing file.</param>
+        /// <param name="callback">User action.</param>
+        ///
+        /// <remarks>
+        /// .NET 3.5 専用の拡張メソッドです。
+        /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
-        public static void SaveEx(this IO io, string dest,
-           Action<System.IO.TextWriter> action) => io.LogWarn(() =>
-           {
-               var code = System.Text.Encoding.UTF8;
-               using (var ss = new System.IO.StreamWriter(new System.IO.MemoryStream(), code))
-               {
-                   action(ss);
-                   using (var ds = io.Create(dest))
-                   {
-                       ss.BaseStream.Position = 0;
-                       ss.BaseStream.CopyTo(ds);
-                   }
-               }
-           });
+        public static void SaveEx(this IO io, string dest, Action<TextWriter> callback)
+        {
+            var code = System.Text.Encoding.UTF8;
+            using (var ss = new StreamWriter(new MemoryStream(), code))
+            {
+                callback(ss);
+                using (var ds = io.Create(dest))
+                {
+                    ss.BaseStream.Position = 0;
+                    ss.BaseStream.CopyTo(ds);
+                }
+            }
+        }
+
+        #region GetTypeName
 
         /* ----------------------------------------------------------------- */
         ///
@@ -234,24 +205,20 @@ namespace Cube.FileSystem.Mixin
         /// <param name="io">ファイル操作用オブジェクト</param>
         /// <param name="path">対象となるパス</param>
         ///
-        /// <remarks>
-        /// 現在は Operator オブジェクトは使用していません。
-        /// </remarks>
-        ///
         /* ----------------------------------------------------------------- */
         public static string GetTypeName(this IO io, string path)
         {
-            if (string.IsNullOrEmpty(path)) return null;
+            if (!path.HasValue()) return string.Empty;
 
             var dest   = new Shell32.SHFILEINFO();
-            var result = Shell32.NativeMethods.SHGetFileInfo(path,
+            var status = Shell32.NativeMethods.SHGetFileInfo(path,
                 0x0080, // FILE_ATTRIBUTE_NORMAL
                 ref dest,
                 (uint)Marshal.SizeOf(dest),
                 0x0410 // SHGFI_TYPENAME | SHGFI_USEFILEATTRIBUTES
             );
 
-            return result != IntPtr.Zero ? dest.szTypeName : null;
+            return (status != IntPtr.Zero) ? dest.szTypeName : string.Empty;
         }
 
         #endregion
@@ -271,7 +238,7 @@ namespace Cube.FileSystem.Mixin
         ///
         /* ----------------------------------------------------------------- */
         public static string GetUniqueName(this IO io, string path) =>
-            GetUniqueName(io, io?.Get(path));
+            GetUniqueName(io, io.Get(path));
 
         /* ----------------------------------------------------------------- */
         ///
@@ -287,8 +254,6 @@ namespace Cube.FileSystem.Mixin
         /* ----------------------------------------------------------------- */
         public static string GetUniqueName(this IO io, Information src)
         {
-            Debug.Assert(io != null);
-
             if (src == null) return null;
             if (!src.Exists) return src.FullName;
 
