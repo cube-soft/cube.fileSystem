@@ -2,12 +2,12 @@
 <package >
     <metadata>
         <id>Cube.FileSystem</id>
-        <version>1.12.0</version>
+        <version>1.13.0</version>
         <title>Cube.FileSystem</title>
         <authors>CubeSoft</authors>
         <owners>CubeSoft</owners>
-        <copyright>Copyright (c) 2010 CubeSoft, Inc.</copyright>
-        <description>I/O library for CubeSoft applications.</description>
+        <copyright>Copyright © 2010 CubeSoft, Inc.</copyright>
+        <description>I/O library for CubeSoft libraries and applications.</description>
         <tags>Cube Windows</tags>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <projectUrl>https://github.com/cube-soft/Cube.FileSystem</projectUrl>
@@ -16,11 +16,11 @@
         <dependencies>
             <group targetFramework="net45">
                 <dependency id="AlphaFS" version="2.2.6" />
-                <dependency id="Cube.Core" version="1.12.0" />
+                <dependency id="Cube.Core" version="1.13.0" />
             </group>
             <group targetFramework="net35">
                 <dependency id="AlphaFS" version="2.2.6" />
-                <dependency id="Cube.Core" version="1.12.0" />
+                <dependency id="Cube.Core" version="1.13.0" />
                 <dependency id="Cube.Backwards" version="1.5.0" />
             </group>
         </dependencies>
