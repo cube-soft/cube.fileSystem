@@ -10,9 +10,9 @@
         <copyright>Copyright © 2010 CubeSoft, Inc.</copyright>
         <tags>Cube IO</tags>
         <license type="expression">Apache-2.0</license>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <projectUrl>https://github.com/cube-soft/Cube.FileSystem</projectUrl>
         <iconUrl>https://github.com/cube-soft/Cube.FileSystem/blob/master/Icon.png?raw=true</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <dependencies>
             <dependency id="AlphaFS" version="2.2.6" />
             <dependency id="Cube.Core" version="1.15.0" />
