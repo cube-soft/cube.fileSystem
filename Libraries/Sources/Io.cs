@@ -15,6 +15,7 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
+using Cube.Log;
 using System;
 using System.IO;
 using System.Linq;
@@ -67,15 +68,15 @@ namespace Cube.FileSystem
         ///
         /* ----------------------------------------------------------------- */
         protected virtual Information GetCore(string path) =>
-            new Information(path, GetRefreshable());
+            new Information(path, GetController());
 
         #endregion
 
-        #region GetRefreshable
+        #region GetController
 
         /* ----------------------------------------------------------------- */
         ///
-        /// GetRefreshable
+        /// GetController
         ///
         /// <summary>
         /// Information の各種プロパティを更新するためのオブジェクトを
@@ -83,11 +84,11 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public IRefreshable GetRefreshable() => GetRefreshableCore();
+        public Controller GetController() => GetControllerCore();
 
         /* ----------------------------------------------------------------- */
         ///
-        /// GetRefreshableCore
+        /// GetControllerCore
         ///
         /// <summary>
         /// Information の各種プロパティを更新するためのオブジェクトを
@@ -101,8 +102,8 @@ namespace Cube.FileSystem
         /// </remarks>
         ///
         /* ----------------------------------------------------------------- */
-        protected virtual IRefreshable GetRefreshableCore() =>
-            _shared ?? (_shared = new Refreshable());
+        protected virtual Controller GetControllerCore() =>
+            _shared ?? (_shared = new Controller());
 
         #endregion
 
@@ -569,12 +570,9 @@ namespace Cube.FileSystem
         /* ----------------------------------------------------------------- */
         public bool TryDelete(string path)
         {
-            try
-            {
-                DeleteCore(path);
-                return true;
-            }
-            catch { return false; }
+            try { DeleteCore(path); return true; }
+            catch (Exception err) { this.LogWarn(err); }
+            return false;
         }
 
         /* ----------------------------------------------------------------- */
@@ -1025,7 +1023,7 @@ namespace Cube.FileSystem
             else
             {
                 var tmp = Combine(src.DirectoryName, Guid.NewGuid().ToString("D"));
-                var ti = Get(tmp);
+                var ti  = Get(tmp);
 
                 if (!MoveFile(dest, ti)) return false;
                 if (!MoveFile(src, dest)) return MoveFile(ti, dest); // recover
@@ -1068,11 +1066,7 @@ namespace Cube.FileSystem
         {
             while (true)
             {
-                try
-                {
-                    f();
-                    return true;
-                }
+                try { f(); return true; }
                 catch (Exception err)
                 {
                     if (Failed == null) throw;
@@ -1107,7 +1101,7 @@ namespace Cube.FileSystem
                     if (Failed == null) throw;
                     var args = new FailedEventArgs(name, paths, err);
                     OnFailed(args);
-                    if (args.Cancel) return default(T);
+                    if (args.Cancel) return default;
                 }
             }
         }
@@ -1115,7 +1109,7 @@ namespace Cube.FileSystem
         #endregion
 
         #region Fields
-        private static IRefreshable _shared;
+        private static Controller _shared;
         #endregion
     }
 }

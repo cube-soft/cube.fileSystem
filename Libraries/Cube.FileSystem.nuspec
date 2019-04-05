@@ -1,34 +1,25 @@
 <?xml version="1.0"?>
 <package >
     <metadata>
+        <version>1.15.0</version>
         <id>Cube.FileSystem</id>
-        <version>1.14.0</version>
         <title>Cube.FileSystem</title>
-        <authors>CubeSoft</authors>
-        <owners>CubeSoft</owners>
-        <copyright>Copyright © 2010 CubeSoft, Inc.</copyright>
+        <authors>clown;cube-soft</authors>
+        <owners>clown,cube-soft</owners>
         <description>I/O library for CubeSoft libraries and applications.</description>
-        <tags>Cube Windows</tags>
+        <copyright>Copyright © 2010 CubeSoft, Inc.</copyright>
+        <tags>Cube IO</tags>
         <license type="expression">Apache-2.0</license>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <projectUrl>https://github.com/cube-soft/Cube.FileSystem</projectUrl>
         <iconUrl>https://github.com/cube-soft/Cube.FileSystem/blob/master/Icon.png?raw=true</iconUrl>
         <dependencies>
-            <group targetFramework="net45">
-                <dependency id="AlphaFS" version="2.2.6" />
-                <dependency id="Cube.Core" version="1.14.0" />
-            </group>
-            <group targetFramework="net35">
-                <dependency id="AlphaFS" version="2.2.6" />
-                <dependency id="Cube.Core" version="1.14.0" />
-                <dependency id="Cube.Backwards" version="1.5.0" />
-            </group>
+            <dependency id="AlphaFS" version="2.2.6" />
+            <dependency id="Cube.Core" version="1.15.0" />
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\Release\Cube.FileSystem.dll" target="lib\net45" />
-        <file src="bin\Release\Cube.FileSystem.xml" target="lib\net45" />
-        <file src="bin\net35\Release\Cube.FileSystem.dll" target="lib\net35" />
-        <file src="bin\net35\Release\Cube.FileSystem.xml" target="lib\net35" />
+        <file src="bin\Any CPU\Release\net45\Cube.FileSystem.*" target="lib\net45" />
+        <file src="bin\Any CPU\Release\net35\Cube.FileSystem.*" target="lib\net35" />
     </files>
 </package>

@@ -22,31 +22,31 @@ namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// RefreshableInfo
+    /// Controllable
     ///
     /// <summary>
-    /// Represents information for the IRefreshable interface.
+    /// Represents the controllable file or directory information.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
     [Serializable]
-    public class RefreshableInfo
+    public class Controllable
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// RefreshableInfo
+        /// Controllable
         ///
         /// <summary>
-        /// Initializes a new instance of the RefreshableInfo class
-        /// with the specified path.
+        /// Initializes a new instance of the Controllable class with
+        /// the specified path.
         /// </summary>
         ///
         /// <param name="src">Path of the file or directory.</param>
         ///
         /* ----------------------------------------------------------------- */
-        internal RefreshableInfo(string src)
+        protected internal Controllable(string src)
         {
             Source = src;
         }
