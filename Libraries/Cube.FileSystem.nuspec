@@ -4,7 +4,7 @@
         <version>1.15.0</version>
         <id>Cube.FileSystem</id>
         <title>Cube.FileSystem</title>
-        <authors>clown;cube-soft</authors>
+        <authors>clown,cube-soft</authors>
         <owners>clown,cube-soft</owners>
         <description>I/O library for CubeSoft libraries and applications.</description>
         <copyright>Copyright © 2010 CubeSoft, Inc.</copyright>
