@@ -16,8 +16,8 @@
 //
 /* ------------------------------------------------------------------------- */
 using Cube.DataContract;
-using Cube.FileSystem.TestService;
 using Cube.Net35;
+using Cube.Tests;
 using Microsoft.Win32;
 using NUnit.Framework;
 using System.Reflection;
