@@ -47,32 +47,30 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Get(IO io)
+        public void Get(int id, IO io)
         {
             var file = io.Get(GetSource("Sample.txt"));
-            var dir  = io.Get(file.DirectoryName);
-            var cmp  = new DateTime(2017, 6, 5);
+            Assert.That(file, Is.Not.Null, $"{id}");
 
-            Assert.That(file.FullName,             Is.EqualTo(GetSource("Sample.txt")));
-            Assert.That(file.Name,                 Is.EqualTo("Sample.txt"));
-            Assert.That(file.NameWithoutExtension, Is.EqualTo("Sample"));
-            Assert.That(file.Extension,            Is.EqualTo(".txt"));
-            Assert.That(file.DirectoryName,        Is.EqualTo(Examples));
-            Assert.That(file.CreationTime,         Is.GreaterThan(cmp));
-            Assert.That(file.LastWriteTime,        Is.GreaterThan(cmp));
-            Assert.That(file.LastAccessTime,       Is.GreaterThan(cmp));
+            var cmp = new DateTime(2017, 6, 5);
+            Assert.That(file.FullName,       Is.EqualTo(GetSource("Sample.txt")));
+            Assert.That(file.Name,           Is.EqualTo("Sample.txt"));
+            Assert.That(file.BaseName,       Is.EqualTo("Sample"));
+            Assert.That(file.Extension,      Is.EqualTo(".txt"));
+            Assert.That(file.DirectoryName,  Is.EqualTo(Examples));
+            Assert.That(file.CreationTime,   Is.GreaterThan(cmp));
+            Assert.That(file.LastWriteTime,  Is.GreaterThan(cmp));
+            Assert.That(file.LastAccessTime, Is.GreaterThan(cmp));
 
-            Assert.That(dir.FullName,              Is.EqualTo(Examples));
-            Assert.That(dir.Name,                  Is.EqualTo("Examples"));
-            Assert.That(dir.NameWithoutExtension,  Is.EqualTo("Examples"));
-            Assert.That(dir.Extension,             Is.Empty);
-            Assert.That(dir.DirectoryName,         Is.Not.Null.And.Not.Empty);
+            var dir = io.Get(file.DirectoryName);
+            Assert.That(dir.FullName,        Is.EqualTo(Examples));
+            Assert.That(dir.Name,            Is.EqualTo("Examples"));
+            Assert.That(dir.BaseName,        Is.EqualTo("Examples"));
+            Assert.That(dir.Extension,       Is.Empty);
+            Assert.That(dir.DirectoryName,   Is.Not.Null.And.Not.Empty);
 
-            Assert.DoesNotThrow(() =>
-            {
-                file.Refresh();
-                dir.Refresh();
-            });
+            file.Refresh(); // Assert.DoesNotThrow
+            dir.Refresh();  // Assert.DoesNotThrow
         }
 
         /* ----------------------------------------------------------------- */
@@ -85,10 +83,10 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Get_Throws(IO io) => Assert.That(
-            () => io.Get(string.Empty),
-            Throws.TypeOf<ArgumentException>()
-        );
+        public void Get_Throws(int id, IO io)
+        {
+            Assert.That(() => io.Get(string.Empty), Throws.ArgumentException, $"{id}");
+        }
 
        /* ----------------------------------------------------------------- */
         ///
@@ -100,9 +98,9 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void GetFiles(IO io)
+        public void GetFiles(int id, IO io)
         {
-            Assert.That(io.GetFiles(Examples).Count(), Is.EqualTo(2));
+            Assert.That(io.GetFiles(Examples).Count(), Is.EqualTo(2), $"{id}");
             Assert.That(io.GetFiles(GetSource("Sample.txt")).Count(), Is.EqualTo(0));
 
             var empty = Get("Empty");
@@ -122,9 +120,9 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void GetDirectories(IO io)
+        public void GetDirectories(int id, IO io)
         {
-            Assert.That(io.GetDirectories(Examples).Count(), Is.EqualTo(1));
+            Assert.That(io.GetDirectories(Examples).Count(), Is.EqualTo(1), $"{id}");
             Assert.That(io.GetDirectories(GetSource("Sample.txt")).Count(), Is.EqualTo(0));
 
             var empty = Get("Empty");
@@ -144,11 +142,11 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Create(IO io)
+        public void Create(int id, IO io)
         {
             var dest = Get("Directory", $"{nameof(Create)}.txt");
             using (var stream = io.Create(dest)) stream.WriteByte((byte)'A');
-            Assert.That(io.Get(dest).Length, Is.EqualTo(1));
+            Assert.That(io.Get(dest).Length, Is.EqualTo(1), $"{id}");
         }
 
         /* ----------------------------------------------------------------- */
@@ -161,7 +159,7 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void OpenWrite(IO io)
+        public void OpenWrite(int id, IO io)
         {
             var src  = io.Get(GetSource("Sample.txt"));
             var dest = io.Get(Get($"{nameof(OpenWrite)}.txt"));
@@ -174,7 +172,7 @@ namespace Cube.FileSystem.Tests
 
             var count = dest.Length;
             using (var stream = io.OpenWrite(dest.FullName)) stream.WriteByte((byte)'A');
-            Assert.That(dest.Length, Is.EqualTo(count));
+            Assert.That(dest.Length, Is.EqualTo(count), $"{id}");
 
             var newfile = Get("Directory", $"{nameof(OpenWrite)}.txt");
             using (var stream = io.OpenWrite(newfile)) stream.WriteByte((byte)'A');
@@ -191,7 +189,7 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Delete(IO io)
+        public void Delete(int id, IO io)
         {
             var dest = Get($"{nameof(Delete)}.txt");
 
@@ -199,7 +197,7 @@ namespace Cube.FileSystem.Tests
             io.SetAttributes(dest, System.IO.FileAttributes.ReadOnly);
             io.Delete(dest);
 
-            Assert.That(io.Exists(dest), Is.False);
+            Assert.That(io.Exists(dest), Is.False, $"{id}");
         }
 
         /* ----------------------------------------------------------------- */
@@ -212,9 +210,9 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void TryDelete(IO io)
+        public void TryDelete(int id, IO io)
         {
-            var dest = Get($"{nameof(TryDelete)}.txt");
+            var dest = Get($"{nameof(TryDelete)}-{id}.txt");
 
             io.Copy(GetSource("Sample.txt"), dest);
             io.SetAttributes(dest, System.IO.FileAttributes.ReadOnly);
@@ -233,7 +231,7 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void DeleteRecursive(IO io)
+        public void DeleteRecursive(int id, IO io)
         {
             var name = "SampleDirectory";
             var dest = Get(name);
@@ -242,7 +240,7 @@ namespace Cube.FileSystem.Tests
             foreach (var f in io.GetFiles(dest)) io.SetAttributes(f, System.IO.FileAttributes.ReadOnly);
             io.Delete(dest);
 
-            Assert.That(io.Exists(dest), Is.False);
+            Assert.That(io.Exists(dest), Is.False, $"{id}");
         }
 
         /* ----------------------------------------------------------------- */
@@ -255,8 +253,11 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Delete_NotFound(IO io) =>
-            Assert.DoesNotThrow(() => io.Delete(Get(nameof(Delete_NotFound))));
+        public void Delete_NotFound(int id, IO io)
+        {
+            var src = Get($"{nameof(Delete_NotFound)}-{id}");
+            io.Delete(src); // Assert.DoesNotThrow
+        }
 
         /* ----------------------------------------------------------------- */
         ///
@@ -273,8 +274,11 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void TryDelete_NotFound(IO io) =>
-            Assert.That(io.TryDelete(Get(nameof(TryDelete_NotFound))), Is.True);
+        public void TryDelete_NotFound(int id, IO io)
+        {
+            var src = Get($"{nameof(TryDelete_NotFound)}-{id}");
+            Assert.That(io.TryDelete(src), Is.True);
+        }
 
         /* ----------------------------------------------------------------- */
         ///
@@ -286,13 +290,10 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void TryDelete_AccessDenied(IO io)
+        public void TryDelete_AccessDenied(int id, IO io)
         {
-            var src = Get($"{nameof(TryDelete_AccessDenied)}.txt");
-            using (var _ = io.Create(src))
-            {
-                Assert.That(io.TryDelete(src), Is.False);
-            }
+            var src = Get($"{nameof(TryDelete_AccessDenied)}-{id}.txt");
+            using (io.Create(src)) Assert.That(io.TryDelete(src), Is.False);
         }
 
         /* ----------------------------------------------------------------- */
@@ -305,13 +306,13 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Move(IO io)
+        public void Move(int id, IO io)
         {
             io.Failed += (s, e) => Assert.Fail($"{e.Name}: {e.Exception}");
 
             var name = "SampleDirectory";
             var src  = io.Get(io.Combine(Results, name));
-            var dest = io.Get(io.Combine(Results, $"{name}-{nameof(Move)}"));
+            var dest = io.Get(io.Combine(Results, $"{name}-{nameof(Move)}-{id}"));
 
             io.Copy(GetSource(name), src.FullName, false);
             src.Refresh();
@@ -345,7 +346,7 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Move_Failed(IO io)
+        public void Move_Failed(int id, IO io)
         {
             var failed = false;
             io.Failed += (s, e) =>
@@ -360,7 +361,7 @@ namespace Cube.FileSystem.Tests
             };
 
             var src  = io.Combine(Results, "FileNotFound.txt");
-            var dest = io.Combine(Results, $"{nameof(Move_Failed)}.txt");
+            var dest = io.Combine(Results, $"{nameof(Move_Failed)}-{id}.txt");
             io.Move(src, dest);
 
             Assert.That(failed, Is.True);
@@ -381,13 +382,12 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Move_Throws(IO io) => Assert.That(
-            () => io.Move(
-                Get("FileNotFound.txt"),
-                Get($"{nameof(Move_Throws)}.txt")
-            ),
-            Throws.TypeOf<System.IO.FileNotFoundException>()
-        );
+        public void Move_Throws(int id, IO io)
+        {
+            var src  = Get("FileNotFound.txt");
+            var dest = Get($"{nameof(Move_Throws)}-{id}.txt");
+            Assert.That(() => io.Move(src, dest), Throws.TypeOf<System.IO.FileNotFoundException>());
+        }
 
         /* ----------------------------------------------------------------- */
         ///
@@ -399,7 +399,7 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Open_Failed(IO io)
+        public void Open_Failed(int id, IO io)
         {
             var failed = false;
             io.Failed += (s, e) =>
@@ -413,7 +413,7 @@ namespace Cube.FileSystem.Tests
                 Assert.That(e.Exception,     Is.TypeOf<System.IO.FileNotFoundException>());
             };
 
-            var src    = Get("FileNotFound.txt");
+            var src    = Get($"{nameof(Open_Failed)}-{id}.txt");
             var stream = io.OpenRead(src);
 
             Assert.That(failed, Is.True);
@@ -430,10 +430,11 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Open_Throws(IO io) => Assert.That(
-            () => io.OpenRead(Get("FileNotFound.txt")),
-            Throws.TypeOf<System.IO.FileNotFoundException>()
-        );
+        public void Open_Throws(int id, IO io)
+        {
+            var src = Get($"{nameof(Open_Throws)}-{id}.txt");
+            Assert.That(() => io.OpenRead(src), Throws.TypeOf<System.IO.FileNotFoundException>());
+        }
 
         /* ----------------------------------------------------------------- */
         ///
@@ -445,11 +446,11 @@ namespace Cube.FileSystem.Tests
         ///
         /* ----------------------------------------------------------------- */
         [TestCaseSource(nameof(TestCases))]
-        public void Exists_NullOrEmpty(IO io)
+        public void Exists_NullOrEmpty(int id, IO io)
         {
-            Assert.That(io.Exists(string.Empty), Is.False);
-            Assert.That(io.Exists(""),           Is.False);
-            Assert.That(io.Exists(null),         Is.False);
+            Assert.That(io.Exists(string.Empty), Is.False, $"{id}");
+            Assert.That(io.Exists(""),           Is.False, $"{id}");
+            Assert.That(io.Exists(null),         Is.False, $"{id}");
         }
 
         #endregion
@@ -469,8 +470,9 @@ namespace Cube.FileSystem.Tests
         {
             get
             {
-                yield return new TestCaseData(new IO());
-                yield return new TestCaseData(new AfsIO());
+                var n = 0;
+                yield return new TestCaseData(n++, new IO());
+                yield return new TestCaseData(n++, new AfsIO());
             }
         }
 
