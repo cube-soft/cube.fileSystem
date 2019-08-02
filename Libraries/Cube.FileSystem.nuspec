@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package >
     <metadata>
-        <version>1.16.0</version>
+        <version>1.17.0</version>
         <id>Cube.FileSystem</id>
         <title>Cube.FileSystem</title>
         <authors>clown,cube-soft</authors>
         <owners>clown,cube-soft</owners>
-        <description>I/O library for CubeSoft libraries and applications.</description>
+        <description>I/O library available for .NET Framework 3.5, 4.5, or later.</description>
         <copyright>Copyright © 2010 CubeSoft, Inc.</copyright>
         <tags>Cube IO</tags>
         <license type="expression">Apache-2.0</license>
@@ -15,7 +15,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <dependencies>
             <dependency id="AlphaFS" version="2.2.6" />
-            <dependency id="Cube.Core" version="1.16.0" />
+            <dependency id="Cube.Core" version="1.17.0" />
         </dependencies>
     </metadata>
     <files>
