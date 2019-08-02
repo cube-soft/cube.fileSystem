@@ -22,125 +22,242 @@ namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// StreamProxy
+    /// Entity
     ///
     /// <summary>
-    /// Provides a proxy of the original Stream instance.
+    /// Represents the file or directory information.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
-    public class StreamProxy : Stream
+    [Serializable]
+    public class Entity
     {
-        /* ----------------------------------------------------------------- */
-        ///
-        /// StreamProxy
-        ///
-        /// <summary>
-        /// Initializes a new instance of the StreamProxy class with the
-        /// specified stream.
-        /// </summary>
-        ///
-        /// <param name="stream">Original stream.</param>
-        ///
-        /* ----------------------------------------------------------------- */
-        public StreamProxy(Stream stream) : this(stream, false) { }
+        #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// StreamProxy
+        /// Entity
         ///
         /// <summary>
-        /// Initializes a new instance of the StreamProxy class with the
-        /// specified parameters.
+        /// Creates a new instance of the Entity class with the
+        /// specified path of file or directory.
         /// </summary>
         ///
-        /// <param name="stream">Original stream.</param>
-        /// <param name="leaveOpen">
-        /// true to leave the stream open after the StreamProxy object
-        /// is disposed; otherwise, false.
-        /// </param>
+        /// <param name="src">Path of file or directory.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public StreamProxy(Stream stream, bool leaveOpen)
+        public Entity(string src) : this(src, new Controller()) { }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Information
+        ///
+        /// <summary>
+        /// Creates a new instance of the Information class with the
+        /// specified object.
+        /// </summary>
+        ///
+        /// <param name="src">Copied information.</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public Entity(Entity src) : this(src.Source, src.Controller) { }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Information
+        ///
+        /// <summary>
+        /// Creates a new instance of the Information class with the
+        /// specified arguments.
+        /// </summary>
+        ///
+        /// <param name="src">Path of the source file.</param>
+        /// <param name="controller">Refresher object.</param>
+        /// <param name="options">Optional parameters.</param>
+        ///
+        /// <remarks>
+        /// options for the Controller inherited classes.
+        /// </remarks>
+        ///
+        /* ----------------------------------------------------------------- */
+        public Entity(string src, Controller controller, params object[] options)
         {
-            BaseStream = stream;
-            _leave = leaveOpen;
+            Controller   = controller;
+            Controllable = controller.Create(src, options);
         }
+
+        #endregion
 
         #region Properties
 
         /* ----------------------------------------------------------------- */
         ///
-        /// StreamProxy
+        /// Source
         ///
         /// <summary>
-        /// Gets the original stream.
+        /// Gets the original path.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public Stream BaseStream { get; private set; }
+        public string Source => Controllable.Source;
 
         /* ----------------------------------------------------------------- */
         ///
-        /// CanRead
+        /// Exists
         ///
         /// <summary>
-        /// Gets a value indicating whether the current stream supports
-        /// reading.
+        /// Gets the value indicating whether the Source exists.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public override bool CanRead => BaseStream?.CanRead ?? false;
+        public bool Exists => Controllable.Exists;
 
         /* ----------------------------------------------------------------- */
         ///
-        /// CanSeek
+        /// IsDirectory
         ///
         /// <summary>
-        /// Gets a value indicating whether the current stream supports
-        /// seeking.
+        /// Gets a value indicating whether the provided path is a directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public override bool CanSeek => BaseStream?.CanSeek ?? false;
+        public bool IsDirectory => Controllable.IsDirectory;
 
         /* ----------------------------------------------------------------- */
         ///
-        /// CanWrite
+        /// Name
         ///
         /// <summary>
-        /// Gets a value indicating whether the current stream supports
-        /// writing.
+        /// Gets the filename.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public override bool CanWrite => BaseStream?.CanWrite ?? false;
+        public string Name => Controllable.Name;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// BaseName
+        ///
+        /// <summary>
+        /// Gets the filename without extension.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public string BaseName => Controllable.BaseName;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Extension
+        ///
+        /// <summary>
+        /// Gets the extension part of the filename.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public string Extension => Controllable.Extension;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// FullName
+        ///
+        /// <summary>
+        /// Gets the full path.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public string FullName => Controllable.FullName;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// DirectoryName
+        ///
+        /// <summary>
+        /// Gets the directory name.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public string DirectoryName => Controllable.DirectoryName;
 
         /* ----------------------------------------------------------------- */
         ///
         /// Length
         ///
         /// <summary>
-        /// Gets the length of the stream in bytes.
+        /// Gets the file-size.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public override long Length => Invoke(() => BaseStream.Length);
+        public long Length => Controllable.Length;
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Position
+        /// Attributes
         ///
         /// <summary>
-        /// Gets or sets the current position within the stream.
+        /// Gets the attributes of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public override long Position
-        {
-            get => Invoke(() => BaseStream.Position);
-            set => Invoke(() => BaseStream.Position = value);
-        }
+        public FileAttributes Attributes => Controllable.Attributes;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// CreationTime
+        ///
+        /// <summary>
+        /// Gets the creation time of the file or directory.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public DateTime CreationTime => Controllable.CreationTime;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// LastWriteTime
+        ///
+        /// <summary>
+        /// Gets the last written time of the file or directory.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public DateTime LastWriteTime => Controllable.LastWriteTime;
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// LastAccessTime
+        ///
+        /// <summary>
+        /// Gets the last accessed time of the file or directory.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public DateTime LastAccessTime => Controllable.LastAccessTime;
+
+        #region Core
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Controllable
+        ///
+        /// <summary>
+        /// Gets the inner object.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected Controllable Controllable { get; }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Controller
+        ///
+        /// <summary>
+        /// Gets the controller object.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected Controller Controller { get; }
+
+        #endregion
 
         #endregion
 
@@ -148,139 +265,15 @@ namespace Cube.FileSystem
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Flush
+        /// Refresh
         ///
         /// <summary>
-        /// Clears all buffers for this stream and causes any buffered
-        /// data to be written to the underlying device.
+        /// Refreshes file or directory information.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public override void Flush() => Invoke(() => BaseStream.Flush());
+        public void Refresh() => Controller.Refresh(Controllable);
 
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Read
-        ///
-        /// <summary>
-        /// Reads a sequence of bytes from the current stream and advances
-        /// the position within the stream by the number of bytes read.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public override int Read(byte[] buffer, int offset, int count) =>
-            Invoke(() => BaseStream.Read(buffer, offset, count));
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Seek
-        ///
-        /// <summary>
-        /// Sets the position within the current stream.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public override long Seek(long offset, SeekOrigin origin) =>
-            Invoke(() => BaseStream.Seek(offset, origin));
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// SetLength
-        ///
-        /// <summary>
-        /// Sets the length of the current stream.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public override void SetLength(long value) =>
-            Invoke(() => BaseStream.SetLength(value));
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Write
-        ///
-        /// <summary>
-        /// writes a sequence of bytes to the current stream and advances
-        /// the current position within this stream by the number of
-        /// bytes written.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public override void Write(byte[] buffer, int offset, int count) =>
-            Invoke(() => BaseStream.Write(buffer, offset, count));
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Dispose
-        ///
-        /// <summary>
-        /// Releases the unmanaged resources used by the StreamProxy
-        /// and optionally releases the managed resources.
-        /// </summary>
-        ///
-        /// <param name="disposing">
-        /// true to release both managed and unmanaged resources;
-        /// false to release only unmanaged resources.
-        /// </param>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected override void Dispose(bool disposing)
-        {
-            try
-            {
-                if (_disposed) return;
-                _disposed = true;
-
-                if (disposing)
-                {
-                    if (!_leave) BaseStream.Dispose();
-                    BaseStream = null;
-                }
-            }
-            finally { base.Dispose(disposing); }
-        }
-
-        #endregion
-
-        #region Implementations
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Invoke
-        ///
-        /// <summary>
-        /// Invokes the specified action object or throws an
-        /// ObjectDisposedException.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        private void Invoke(Action action)
-        {
-            if (_disposed) throw new ObjectDisposedException(GetType().Name);
-            else action();
-        }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Invoke
-        ///
-        /// <summary>
-        /// Invokes the specified function object or throws an
-        /// ObjectDisposedException.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        private T Invoke<T>(Func<T> func)
-        {
-            if (_disposed) throw new ObjectDisposedException(GetType().Name);
-            return func();
-        }
-
-        #endregion
-
-        #region Fields
-        private bool _disposed = false;
-        private readonly bool _leave;
         #endregion
     }
 }
