@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package >
     <metadata>
-        <version>1.17.0</version>
+        <version>1.18.0</version>
         <id>Cube.FileSystem</id>
         <title>Cube.FileSystem</title>
         <authors>clown,cube-soft</authors>
@@ -15,7 +15,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <dependencies>
             <dependency id="AlphaFS" version="2.2.6" />
-            <dependency id="Cube.Core" version="1.17.0" />
+            <dependency id="Cube.Core" version="1.18.0" />
         </dependencies>
     </metadata>
     <files>
