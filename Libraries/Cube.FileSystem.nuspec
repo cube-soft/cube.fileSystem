@@ -9,9 +9,9 @@
         <description>I/O library available for .NET Framework 3.5, 4.5, or later.</description>
         <copyright>Copyright © 2010 CubeSoft, Inc.</copyright>
         <tags>Cube IO</tags>
+        <icon>images\Icon.png</icon>
         <license type="expression">Apache-2.0</license>
         <projectUrl>https://github.com/cube-soft/Cube.FileSystem</projectUrl>
-        <iconUrl>https://github.com/cube-soft/Cube.FileSystem/blob/master/Icon.png?raw=true</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <dependencies>
             <dependency id="AlphaFS" version="2.2.6" />
@@ -19,6 +19,7 @@
         </dependencies>
     </metadata>
     <files>
+        <file src="..\Icon.png" target="images" />
         <file src="bin\Any CPU\Release\net45\Cube.FileSystem.*" target="lib\net45" />
         <file src="bin\Any CPU\Release\net35\Cube.FileSystem.*" target="lib\net35" />
     </files>
