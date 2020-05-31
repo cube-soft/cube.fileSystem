@@ -9,7 +9,7 @@
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/cube-soft/$(AssemblyName)</PackageProjectUrl>
         <PackageIcon>images\Icon.png</PackageIcon>
-        <TargetFramework>net45</TargetFramework>
+        <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Optimize>true</Optimize>
         <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
@@ -23,7 +23,6 @@
         <DocumentationFile>bin\Any CPU\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="AlphaFS" Version="2.2.6" />
         <PackageReference Include="Cube.Core" Version="2.0.0" />
     </ItemGroup>
     <ItemGroup>

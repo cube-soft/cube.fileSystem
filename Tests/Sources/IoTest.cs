@@ -473,7 +473,6 @@ namespace Cube.FileSystem.Tests
             {
                 var n = 0;
                 yield return new TestCaseData(n++, new IO());
-                yield return new TestCaseData(n++, new AfsIO());
             }
         }
 
