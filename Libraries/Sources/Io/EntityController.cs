@@ -22,21 +22,21 @@ namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// Controller
+    /// EntityController
     ///
     /// <summary>
-    /// Provides to create or refresh properties of an Information object.
+    /// Provides to create or refresh properties of an Entity object.
     /// </summary>
     ///
     /// <remarks>
-    /// Information オブジェクトのプロパティは読み取り専用であるため、
+    /// Entity オブジェクトのプロパティは読み取り専用であるため、
     /// 外部から更新する事はできません。そのため、更新の際には
-    /// Controller クラス経由で更新処理を実行する必要があります。
+    /// EntityController クラス経由で更新処理を実行する必要があります。
     /// </remarks>
     ///
     /* --------------------------------------------------------------------- */
     [Serializable]
-    public class Controller
+    public class EntityController
     {
         #region Methods
 
@@ -55,9 +55,9 @@ namespace Cube.FileSystem
         /// <returns>Controllable object.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        public virtual Controllable Create(string src, params object[] options)
+        public virtual EntityControllable Create(string src, params object[] options)
         {
-            var dest = new Controllable(src);
+            var dest = new EntityControllable(src);
             Refresh(dest);
             return dest;
         }
@@ -73,7 +73,7 @@ namespace Cube.FileSystem
         /// <param name="src">Object to be refreshed.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public virtual void Refresh(Controllable src)
+        public virtual void Refresh(EntityControllable src)
         {
             var obj = CreateCore(src.Source);
 
@@ -108,7 +108,7 @@ namespace Cube.FileSystem
         private FileSystemInfo CreateCore(string path) =>
             Directory.Exists(path) ?
             new DirectoryInfo(path) as FileSystemInfo :
-            new FileInfo(path) as FileSystemInfo;
+            new FileInfo(path);
 
         /* ----------------------------------------------------------------- */
         ///

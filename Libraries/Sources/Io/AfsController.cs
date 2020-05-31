@@ -15,8 +15,8 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
-using Alphaleonis.Win32.Filesystem;
 using System;
+using Alphaleonis.Win32.Filesystem;
 
 namespace Cube.FileSystem
 {
@@ -25,12 +25,13 @@ namespace Cube.FileSystem
     /// AfsController
     ///
     /// <summary>
-    /// AlphaFS を利用した Controllable オブジェクトの情報更新用クラスです。
+    /// Provides functionality to refresh properties of a EntityControllable
+    /// object by using the AlphaFS module.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
     [Serializable]
-    public class AfsController : Controller
+    public class AfsController : EntityController
     {
         #region Methods
 
@@ -39,13 +40,13 @@ namespace Cube.FileSystem
         /// Refresh
         ///
         /// <summary>
-        /// Information オブジェクトの情報を更新します。
+        /// Refreshes the specified object.
         /// </summary>
         ///
-        /// <param name="src">更新対象オブジェクト</param>
+        /// <param name="src">Object to be refreshed.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public override void Refresh(Controllable src)
+        public override void Refresh(EntityControllable src)
         {
             var obj = CreateCore(src.Source);
 
@@ -73,21 +74,21 @@ namespace Cube.FileSystem
         /// CreateCore
         ///
         /// <summary>
-        /// FileSystemInfo オブジェクトを生成します。
+        /// Creates a new instance of the FileSystemInfo inherited class.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
         private FileSystemInfo CreateCore(string path) =>
             Directory.Exists(path) ?
             new DirectoryInfo(path) as FileSystemInfo :
-            new FileInfo(path) as FileSystemInfo;
+            new FileInfo(path);
 
         /* ----------------------------------------------------------------- */
         ///
         /// TryCast
         ///
         /// <summary>
-        /// FileInfo オブジェクトへのキャストを試行します。
+        /// Tries to cast to the FileInfo object.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */

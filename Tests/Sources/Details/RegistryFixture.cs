@@ -15,12 +15,12 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
+using System.Reflection;
 using Cube.DataContract;
 using Cube.Net35;
 using Cube.Tests;
 using Microsoft.Win32;
 using NUnit.Framework;
-using System.Reflection;
 
 namespace Cube.FileSystem.Tests
 {
@@ -29,7 +29,7 @@ namespace Cube.FileSystem.Tests
     /// RegistryFixture
     ///
     /// <summary>
-    /// テストでレジストリを使用するためのクラスです。
+    /// Provides functionality to support for registry-related testing.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -42,7 +42,7 @@ namespace Cube.FileSystem.Tests
         /// Assembly
         ///
         /// <summary>
-        /// アセンブリ情報を取得します。
+        /// Gets the Assembly object.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -53,7 +53,7 @@ namespace Cube.FileSystem.Tests
         /// Shared
         ///
         /// <summary>
-        /// 共通するサブキー名を取得します。
+        /// Gets the shared registry subkey name.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -64,7 +64,7 @@ namespace Cube.FileSystem.Tests
         /// Default
         ///
         /// <summary>
-        /// デフォルトのサブキー名を取得します。
+        /// Gets the default name of the registry subkey.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -79,7 +79,7 @@ namespace Cube.FileSystem.Tests
         /// GetKeyName
         ///
         /// <summary>
-        /// サブキー名を取得します。
+        /// Gets the registry subkey name.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -90,7 +90,7 @@ namespace Cube.FileSystem.Tests
         /// CreateSubKey
         ///
         /// <summary>
-        /// レジストリ・サブキーを作成します。
+        /// Creates a registry subkey with the specified name.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -102,7 +102,7 @@ namespace Cube.FileSystem.Tests
         /// OpenSubKey
         ///
         /// <summary>
-        /// レジストリ・サブキーを読み取り専用で開きます。
+        /// Opens the registry subkey of the specified name in readonly mode.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -116,40 +116,38 @@ namespace Cube.FileSystem.Tests
         /// Setup
         ///
         /// <summary>
-        /// 各テスト前に実行します。
+        /// Invokes the setup for each test.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
         [SetUp]
         protected virtual void Setup()
         {
-            using (var k = CreateSubKey(Default))
+            using var k = CreateSubKey(Default);
+            k.SetValue("ID", 1357);
+            k.SetValue(nameof(Person.Name), "山田太郎");
+            k.SetValue(nameof(Person.Sex), 0);
+            k.SetValue(nameof(Person.Age), 52);
+            k.SetValue(nameof(Person.Creation), "2015/03/16 02:32:26");
+            k.SetValue(nameof(Person.Reserved), 1);
+
+            using (var sk = k.CreateSubKey(nameof(Person.Contact)))
             {
-                k.SetValue("ID", 1357);
-                k.SetValue(nameof(Person.Name), "山田太郎");
-                k.SetValue(nameof(Person.Sex), 0);
-                k.SetValue(nameof(Person.Age), 52);
-                k.SetValue(nameof(Person.Creation), "2015/03/16 02:32:26");
-                k.SetValue(nameof(Person.Reserved), 1);
+                sk.SetValue(nameof(Address.Type), "Phone");
+                sk.SetValue(nameof(Address.Value), "090-1234-5678");
+            }
 
-                using (var sk = k.CreateSubKey(nameof(Person.Contact)))
-                {
-                    sk.SetValue(nameof(Address.Type), "Phone");
-                    sk.SetValue(nameof(Address.Value), "090-1234-5678");
-                }
+            using (var sk = k.CreateSubKey(nameof(Person.Others)))
+            {
+                using (var ssk = sk.CreateSubKey("0")) SetAddress(ssk, "PC", "pc@example.com");
+                using (var ssk = sk.CreateSubKey("1")) SetAddress(ssk, "Mobile", "mobile@example.com");
+            }
 
-                using (var sk = k.CreateSubKey(nameof(Person.Others)))
-                {
-                    using (var ssk = sk.CreateSubKey("0")) SetAddress(ssk, "PC", "pc@example.com");
-                    using (var ssk = sk.CreateSubKey("1")) SetAddress(ssk, "Mobile", "mobile@example.com");
-                }
-
-                using (var sk = k.CreateSubKey(nameof(Person.Messages)))
-                {
-                    using (var ssk = sk.CreateSubKey("0")) ssk.SetValue("", "1st message");
-                    using (var ssk = sk.CreateSubKey("1")) ssk.SetValue("", "2nd message");
-                    using (var ssk = sk.CreateSubKey("2")) ssk.SetValue("", "3rd message");
-                }
+            using (var sk = k.CreateSubKey(nameof(Person.Messages)))
+            {
+                using (var ssk = sk.CreateSubKey("0")) ssk.SetValue("", "1st message");
+                using (var ssk = sk.CreateSubKey("1")) ssk.SetValue("", "2nd message");
+                using (var ssk = sk.CreateSubKey("2")) ssk.SetValue("", "3rd message");
             }
         }
 
@@ -158,7 +156,7 @@ namespace Cube.FileSystem.Tests
         /// Teardown
         ///
         /// <summary>
-        /// 各テスト後に実行します。
+        /// Invokes the teardown for each test.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -176,7 +174,8 @@ namespace Cube.FileSystem.Tests
         /// SetAddress
         ///
         /// <summary>
-        /// レジストリに Address オブジェクトに対応する値を設定します。
+        /// Set the specified address information to the specified registry
+        /// subkey.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */

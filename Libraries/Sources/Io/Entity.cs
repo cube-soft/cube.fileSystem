@@ -22,33 +22,68 @@ namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// Controllable
+    /// Entity
     ///
     /// <summary>
-    /// Represents the controllable file or directory information.
+    /// Represents the file or directory information.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
     [Serializable]
-    public class Controllable
+    public class Entity
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Controllable
+        /// Entity
         ///
         /// <summary>
-        /// Initializes a new instance of the Controllable class with
-        /// the specified path.
+        /// Creates a new instance of the Entity class with the
+        /// specified path of file or directory.
         /// </summary>
         ///
-        /// <param name="src">Path of the file or directory.</param>
+        /// <param name="src">Path of file or directory.</param>
         ///
         /* ----------------------------------------------------------------- */
-        protected internal Controllable(string src)
+        public Entity(string src) : this(src, new EntityController()) { }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Information
+        ///
+        /// <summary>
+        /// Creates a new instance of the Information class with the
+        /// specified object.
+        /// </summary>
+        ///
+        /// <param name="src">Copied information.</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public Entity(Entity src) : this(src.Source, src.Controller) { }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Information
+        ///
+        /// <summary>
+        /// Creates a new instance of the Information class with the
+        /// specified arguments.
+        /// </summary>
+        ///
+        /// <param name="src">Path of the source file.</param>
+        /// <param name="controller">Refresher object.</param>
+        /// <param name="options">Optional parameters.</param>
+        ///
+        /// <remarks>
+        /// options for the Controller inherited classes.
+        /// </remarks>
+        ///
+        /* ----------------------------------------------------------------- */
+        public Entity(string src, EntityController controller, params object[] options)
         {
-            Source = src;
+            Controller   = controller;
+            Controllable = controller.Create(src, options);
         }
 
         #endregion
@@ -64,140 +99,180 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Source { get; }
+        public string Source => Controllable.Source;
 
         /* ----------------------------------------------------------------- */
         ///
         /// Exists
         ///
         /// <summary>
-        /// Gets or sets the value indicating whether the Source exists.
+        /// Gets the value indicating whether the Source exists.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool Exists { get; set; }
+        public bool Exists => Controllable.Exists;
 
         /* ----------------------------------------------------------------- */
         ///
         /// IsDirectory
         ///
         /// <summary>
-        /// Gets or sets the value indicating whether the Source is
-        /// directory.
+        /// Gets a value indicating whether the provided path is a directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool IsDirectory { get; set; }
+        public bool IsDirectory => Controllable.IsDirectory;
 
         /* ----------------------------------------------------------------- */
         ///
         /// Name
         ///
         /// <summary>
-        /// Gets or sets the filename.
+        /// Gets the filename.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Name { get; set; }
+        public string Name => Controllable.Name;
 
         /* ----------------------------------------------------------------- */
         ///
         /// BaseName
         ///
         /// <summary>
-        /// Gets or sets the filename without extension.
+        /// Gets the filename without extension.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string BaseName { get; set; }
+        public string BaseName => Controllable.BaseName;
 
         /* ----------------------------------------------------------------- */
         ///
         /// Extension
         ///
         /// <summary>
-        /// Gets or sets the extension part of the filename.
+        /// Gets the extension part of the filename.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Extension { get; set; }
+        public string Extension => Controllable.Extension;
 
         /* ----------------------------------------------------------------- */
         ///
         /// FullName
         ///
         /// <summary>
-        /// Gets or sets the full path.
+        /// Gets the full path.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string FullName { get; set; }
+        public string FullName => Controllable.FullName;
 
         /* ----------------------------------------------------------------- */
         ///
         /// DirectoryName
         ///
         /// <summary>
-        /// Gets or sets the directory name.
+        /// Gets the directory name.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string DirectoryName { get; set; }
+        public string DirectoryName => Controllable.DirectoryName;
 
         /* ----------------------------------------------------------------- */
         ///
         /// Length
         ///
         /// <summary>
-        /// Gets or sets the file-size.
+        /// Gets the file-size.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public long Length { get; set; }
+        public long Length => Controllable.Length;
 
         /* ----------------------------------------------------------------- */
         ///
         /// Attributes
         ///
         /// <summary>
-        /// Gets or sets the attributes of the file or directory.
+        /// Gets the attributes of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public FileAttributes Attributes { get; set; }
+        public FileAttributes Attributes => Controllable.Attributes;
 
         /* ----------------------------------------------------------------- */
         ///
         /// CreationTime
         ///
         /// <summary>
-        /// Gets or sets the creation time of the file or directory.
+        /// Gets the creation time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime CreationTime { get; set; }
+        public DateTime CreationTime => Controllable.CreationTime;
 
         /* ----------------------------------------------------------------- */
         ///
         /// LastWriteTime
         ///
         /// <summary>
-        /// Gets or sets the last written time of the file or directory.
+        /// Gets the last written time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastWriteTime { get; set; }
+        public DateTime LastWriteTime => Controllable.LastWriteTime;
 
         /* ----------------------------------------------------------------- */
         ///
         /// LastAccessTime
         ///
         /// <summary>
-        /// Gets or sets the last accessed time of the file or directory.
+        /// Gets the last accessed time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastAccessTime { get; set; }
+        public DateTime LastAccessTime => Controllable.LastAccessTime;
+
+        #region Core
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Controllable
+        ///
+        /// <summary>
+        /// Gets the inner object.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected EntityControllable Controllable { get; }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Controller
+        ///
+        /// <summary>
+        /// Gets the controller object.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected EntityController Controller { get; }
+
+        #endregion
+
+        #endregion
+
+        #region Methods
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Refresh
+        ///
+        /// <summary>
+        /// Refreshes file or directory information.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        public void Refresh() => Controller.Refresh(Controllable);
 
         #endregion
     }

@@ -22,68 +22,33 @@ namespace Cube.FileSystem
 {
     /* --------------------------------------------------------------------- */
     ///
-    /// Entity
+    /// EntityControllable
     ///
     /// <summary>
-    /// Represents the file or directory information.
+    /// Represents the controllable file or directory information.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
     [Serializable]
-    public class Entity
+    public class EntityControllable
     {
         #region Constructors
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Entity
+        /// EntityControllable
         ///
         /// <summary>
-        /// Creates a new instance of the Entity class with the
-        /// specified path of file or directory.
+        /// Initializes a new instance of the EntityControllable class
+        /// with the specified path.
         /// </summary>
         ///
-        /// <param name="src">Path of file or directory.</param>
+        /// <param name="src">Path of the file or directory.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public Entity(string src) : this(src, new Controller()) { }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Information
-        ///
-        /// <summary>
-        /// Creates a new instance of the Information class with the
-        /// specified object.
-        /// </summary>
-        ///
-        /// <param name="src">Copied information.</param>
-        ///
-        /* ----------------------------------------------------------------- */
-        public Entity(Entity src) : this(src.Source, src.Controller) { }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Information
-        ///
-        /// <summary>
-        /// Creates a new instance of the Information class with the
-        /// specified arguments.
-        /// </summary>
-        ///
-        /// <param name="src">Path of the source file.</param>
-        /// <param name="controller">Refresher object.</param>
-        /// <param name="options">Optional parameters.</param>
-        ///
-        /// <remarks>
-        /// options for the Controller inherited classes.
-        /// </remarks>
-        ///
-        /* ----------------------------------------------------------------- */
-        public Entity(string src, Controller controller, params object[] options)
+        protected internal EntityControllable(string src)
         {
-            Controller   = controller;
-            Controllable = controller.Create(src, options);
+            Source = src;
         }
 
         #endregion
@@ -99,180 +64,140 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Source => Controllable.Source;
+        public string Source { get; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Exists
         ///
         /// <summary>
-        /// Gets the value indicating whether the Source exists.
+        /// Gets or sets the value indicating whether the Source exists.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool Exists => Controllable.Exists;
+        public bool Exists { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// IsDirectory
         ///
         /// <summary>
-        /// Gets a value indicating whether the provided path is a directory.
+        /// Gets or sets the value indicating whether the Source is
+        /// directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public bool IsDirectory => Controllable.IsDirectory;
+        public bool IsDirectory { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Name
         ///
         /// <summary>
-        /// Gets the filename.
+        /// Gets or sets the filename.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Name => Controllable.Name;
+        public string Name { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// BaseName
         ///
         /// <summary>
-        /// Gets the filename without extension.
+        /// Gets or sets the filename without extension.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string BaseName => Controllable.BaseName;
+        public string BaseName { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Extension
         ///
         /// <summary>
-        /// Gets the extension part of the filename.
+        /// Gets or sets the extension part of the filename.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string Extension => Controllable.Extension;
+        public string Extension { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// FullName
         ///
         /// <summary>
-        /// Gets the full path.
+        /// Gets or sets the full path.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string FullName => Controllable.FullName;
+        public string FullName { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// DirectoryName
         ///
         /// <summary>
-        /// Gets the directory name.
+        /// Gets or sets the directory name.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public string DirectoryName => Controllable.DirectoryName;
+        public string DirectoryName { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Length
         ///
         /// <summary>
-        /// Gets the file-size.
+        /// Gets or sets the file-size.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public long Length => Controllable.Length;
+        public long Length { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// Attributes
         ///
         /// <summary>
-        /// Gets the attributes of the file or directory.
+        /// Gets or sets the attributes of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public FileAttributes Attributes => Controllable.Attributes;
+        public FileAttributes Attributes { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// CreationTime
         ///
         /// <summary>
-        /// Gets the creation time of the file or directory.
+        /// Gets or sets the creation time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime CreationTime => Controllable.CreationTime;
+        public DateTime CreationTime { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// LastWriteTime
         ///
         /// <summary>
-        /// Gets the last written time of the file or directory.
+        /// Gets or sets the last written time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastWriteTime => Controllable.LastWriteTime;
+        public DateTime LastWriteTime { get; set; }
 
         /* ----------------------------------------------------------------- */
         ///
         /// LastAccessTime
         ///
         /// <summary>
-        /// Gets the last accessed time of the file or directory.
+        /// Gets or sets the last accessed time of the file or directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        public DateTime LastAccessTime => Controllable.LastAccessTime;
-
-        #region Core
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Controllable
-        ///
-        /// <summary>
-        /// Gets the inner object.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected Controllable Controllable { get; }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Controller
-        ///
-        /// <summary>
-        /// Gets the controller object.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected Controller Controller { get; }
-
-        #endregion
-
-        #endregion
-
-        #region Methods
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Refresh
-        ///
-        /// <summary>
-        /// Refreshes file or directory information.
-        /// </summary>
-        ///
-        /* ----------------------------------------------------------------- */
-        public void Refresh() => Controller.Refresh(Controllable);
+        public DateTime LastAccessTime { get; set; }
 
         #endregion
     }

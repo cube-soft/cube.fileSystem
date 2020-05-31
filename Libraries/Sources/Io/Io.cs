@@ -15,10 +15,11 @@
 // limitations under the License.
 //
 /* ------------------------------------------------------------------------- */
-using Cube.Mixin.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cube.Mixin.Logging;
 
 namespace Cube.FileSystem
 {
@@ -27,7 +28,7 @@ namespace Cube.FileSystem
     /// IO
     ///
     /// <summary>
-    /// ファイル操作を実行するクラスの基底となるクラスです。
+    /// Provides functionality to do something to a file or directory.
     /// </summary>
     ///
     /* --------------------------------------------------------------------- */
@@ -42,13 +43,12 @@ namespace Cube.FileSystem
         /// Get
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの情報を保持するオブジェクトを
-        /// 取得します。
+        /// Gets the Entity object from the specified path.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
+        /// <param name="path">Target path.</param>
         ///
-        /// <returns>IInformation オブジェクト</returns>
+        /// <returns>Entity object.</returns>
         ///
         /* ----------------------------------------------------------------- */
         public Entity Get(string path) => GetCore(path);
@@ -58,13 +58,12 @@ namespace Cube.FileSystem
         /// GetCore
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの情報を保持するオブジェクトを
-        /// 取得します。
+        /// Gets the Entity object from the specified path.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
+        /// <param name="path">Target path.</param>
         ///
-        /// <returns>IInformation オブジェクト</returns>
+        /// <returns>Entity object.</returns>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual Entity GetCore(string path) =>
@@ -79,31 +78,26 @@ namespace Cube.FileSystem
         /// GetController
         ///
         /// <summary>
-        /// Information の各種プロパティを更新するためのオブジェクトを
-        /// 取得します。
+        /// Gets the EntityController object.
         /// </summary>
         ///
+        /// <returns>EntityController object.</returns>
+        ///
         /* ----------------------------------------------------------------- */
-        public Controller GetController() => GetControllerCore();
+        public EntityController GetController() => GetControllerCore();
 
         /* ----------------------------------------------------------------- */
         ///
         /// GetControllerCore
         ///
         /// <summary>
-        /// Information の各種プロパティを更新するためのオブジェクトを
-        /// 取得します。
+        /// Gets the Controller object.
         /// </summary>
         ///
-        /// <remarks>
-        /// Refreshable クラスにはオブジェクト毎に保持する状態が存在
-        /// しないため、複数のオブジェクトで Refreshable オブジェクトを
-        /// 共有する事とします。
-        /// </remarks>
+        /// <returns>Controller object.</returns>
         ///
         /* ----------------------------------------------------------------- */
-        protected virtual Controller GetControllerCore() =>
-            _shared ?? (_shared = new Controller());
+        protected virtual EntityController GetControllerCore() => _shared ??= new EntityController();
 
         #endregion
 
@@ -129,7 +123,7 @@ namespace Cube.FileSystem
         /// </returns>
         ///
         /* ----------------------------------------------------------------- */
-        public string[] GetFiles(string path) => GetFiles(path, "*");
+        public IEnumerable<string> GetFiles(string path) => GetFiles(path, "*");
 
         /* ----------------------------------------------------------------- */
         ///
@@ -159,7 +153,7 @@ namespace Cube.FileSystem
         /// </returns>
         ///
         /* ----------------------------------------------------------------- */
-        public string[] GetFiles(string path, string pattern) =>
+        public IEnumerable<string> GetFiles(string path, string pattern) =>
             GetFiles(path, pattern, SearchOption.TopDirectoryOnly);
 
         /* ----------------------------------------------------------------- */
@@ -197,7 +191,7 @@ namespace Cube.FileSystem
         /// </returns>
         ///
         /* ----------------------------------------------------------------- */
-        public string[] GetFiles(string path, string pattern, SearchOption option) =>
+        public IEnumerable<string> GetFiles(string path, string pattern, SearchOption option) =>
             GetFilesCore(path, pattern, option) ?? new string[0];
 
         /* ----------------------------------------------------------------- */
@@ -211,7 +205,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected virtual string[] GetFilesCore(string path, string pattern, SearchOption option) =>
+        protected virtual IEnumerable<string> GetFilesCore(string path, string pattern, SearchOption option) =>
             Directory.Exists(path) ? Directory.GetFiles(path, pattern, option) : null;
 
         #endregion
@@ -238,7 +232,7 @@ namespace Cube.FileSystem
         /// </returns>
         ///
         /* ----------------------------------------------------------------- */
-        public string[] GetDirectories(string path) => GetDirectories(path, "*");
+        public IEnumerable<string> GetDirectories(string path) => GetDirectories(path, "*");
 
         /* ----------------------------------------------------------------- */
         ///
@@ -269,7 +263,7 @@ namespace Cube.FileSystem
         /// </returns>
         ///
         /* ----------------------------------------------------------------- */
-        public string[] GetDirectories(string path, string pattern) =>
+        public IEnumerable<string> GetDirectories(string path, string pattern) =>
             GetDirectories(path, pattern, SearchOption.TopDirectoryOnly);
 
         /* ----------------------------------------------------------------- */
@@ -308,7 +302,7 @@ namespace Cube.FileSystem
         /// </returns>
         ///
         /* ----------------------------------------------------------------- */
-        public string[] GetDirectories(string path, string pattern, SearchOption option) =>
+        public IEnumerable<string> GetDirectories(string path, string pattern, SearchOption option) =>
             GetDirectoriesCore(path, pattern, option) ?? new string[0];
 
         /* ----------------------------------------------------------------- */
@@ -322,7 +316,7 @@ namespace Cube.FileSystem
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
-        protected virtual string[] GetDirectoriesCore(string path, string pattern, SearchOption option) =>
+        protected virtual IEnumerable<string> GetDirectoriesCore(string path, string pattern, SearchOption option) =>
             Directory.Exists(path) ? Directory.GetDirectories(path, pattern, option) : null;
 
         #endregion
@@ -334,11 +328,11 @@ namespace Cube.FileSystem
         /// SetAttributes
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに属性を設定します。
+        /// Sets the specified attributes to the specified file or directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="attr">属性</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="attr">Attributes to set.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void SetAttributes(string path, FileAttributes attr) =>
@@ -349,11 +343,11 @@ namespace Cube.FileSystem
         /// SetAttributesCore
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに属性を設定します。
+        /// Sets the specified attributes to the specified file or directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="attr">属性</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="attr">Attributes to set.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void SetAttributesCore(string path, FileAttributes attr)
@@ -371,11 +365,12 @@ namespace Cube.FileSystem
         /// SetCreationTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに作成日時を設定します。
+        /// Sets the specified creation time to the specified file or
+        /// directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="time">作成日時</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="time">Creation time.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void SetCreationTime(string path, DateTime time) =>
@@ -386,11 +381,12 @@ namespace Cube.FileSystem
         /// SetCreationTimeCore
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに作成日時を設定します。
+        /// Sets the specified creation time to the specified file or
+        /// directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="time">作成日時</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="time">Creation time.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void SetCreationTimeCore(string path, DateTime time)
@@ -408,11 +404,12 @@ namespace Cube.FileSystem
         /// SetLastWriteTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに最終更新日時を設定します。
+        /// Sets the specified last updated time to the specified file or
+        /// directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="time">最終更新日時</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="time">Last updated time.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void SetLastWriteTime(string path, DateTime time) =>
@@ -423,11 +420,12 @@ namespace Cube.FileSystem
         /// SetLastWriteTimeCore
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに最終更新日時を設定します。
+        /// Sets the specified last updated time to the specified file or
+        /// directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="time">最終更新日時</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="time">Last updated time.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void SetLastWriteTimeCore(string path, DateTime time)
@@ -445,11 +443,12 @@ namespace Cube.FileSystem
         /// SetLastAccessTime
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに最終アクセス日時を設定します。
+        /// Sets the specified last accessed time to the specified file or
+        /// directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="time">最終アクセス日時</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="time">Last accessed time.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void SetLastAccessTime(string path, DateTime time) =>
@@ -460,11 +459,12 @@ namespace Cube.FileSystem
         /// SetLastAccessTimeCore
         ///
         /// <summary>
-        /// ファイルまたはディレクトリに最終アクセス日時を設定します。
+        /// Sets the specified last accessed time to the specified file or
+        /// directory.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
-        /// <param name="time">最終アクセス日時</param>
+        /// <param name="path">Target path.</param>
+        /// <param name="time">Last accessed time.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void SetLastAccessTimeCore(string path, DateTime time)
@@ -482,10 +482,12 @@ namespace Cube.FileSystem
         /// Combine
         ///
         /// <summary>
-        /// パスを結合します。
+        /// Combiles the specified paths.
         /// </summary>
         ///
-        /// <param name="paths">結合するパス一覧</param>
+        /// <param name="paths">Collection of paths.</param>
+        ///
+        /// <returns>Combined path.</returns>
         ///
         /* ----------------------------------------------------------------- */
         public string Combine(params string[] paths) => CombineCore(paths);
@@ -495,10 +497,12 @@ namespace Cube.FileSystem
         /// CombineCore
         ///
         /// <summary>
-        /// パスを結合します。
+        /// Combiles the specified paths.
         /// </summary>
         ///
-        /// <param name="paths">結合するパス一覧</param>
+        /// <param name="paths">Collection of paths.</param>
+        ///
+        /// <returns>Combined path.</returns>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual string CombineCore(params string[] paths)
@@ -515,10 +519,12 @@ namespace Cube.FileSystem
         /// Exists
         ///
         /// <summary>
-        /// ファイルまたはディレクトリが存在するかどうかを判別します。
+        /// Determines whether the specified file or directory exists.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
+        /// <param name="path">Target path.</param>
+        ///
+        /// <returns>true for exists.</returns>
         ///
         /* ----------------------------------------------------------------- */
         public bool Exists(string path) => ExistsCore(path);
@@ -528,10 +534,12 @@ namespace Cube.FileSystem
         /// ExistsCore
         ///
         /// <summary>
-        /// ファイルまたはディレクトリが存在するかどうかを判別します。
+        /// Determines whether the specified file or directory exists.
         /// </summary>
         ///
-        /// <param name="path">対象となるパス</param>
+        /// <param name="path">Target path.</param>
+        ///
+        /// <returns>true for exists.</returns>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual bool ExistsCore(string path) =>
@@ -546,10 +554,10 @@ namespace Cube.FileSystem
         /// Delete
         ///
         /// <summary>
-        /// ファイルまたはディレクトリを削除します。
+        /// Deletes the specified file or directory.
         /// </summary>
         ///
-        /// <param name="path">削除するファイルのパス</param>
+        /// <param name="path">Path to delete.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void Delete(string path) =>
@@ -560,12 +568,12 @@ namespace Cube.FileSystem
         /// TryDelete
         ///
         /// <summary>
-        /// ファイルまたはディレクトリの削除を試行します。
+        /// Tries to delete the specified file or directory.
         /// </summary>
         ///
-        /// <param name="path">削除するファイルのパス</param>
+        /// <param name="path">Path to delete.</param>
         ///
-        /// <returns>削除が成功したかどうか</returns>
+        /// <returns>true for success.</returns>
         ///
         /* ----------------------------------------------------------------- */
         public bool TryDelete(string path)
@@ -580,10 +588,10 @@ namespace Cube.FileSystem
         /// DeleteCore
         ///
         /// <summary>
-        /// ファイルまたはディレクトリを削除します。
+        /// Deletes the specified file or directory.
         /// </summary>
         ///
-        /// <param name="path">削除対象となるパス</param>
+        /// <param name="path">Path to delete.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void DeleteCore(string path)
@@ -611,10 +619,10 @@ namespace Cube.FileSystem
         /// CreateDirectory
         ///
         /// <summary>
-        /// ディレクトリを作成します。
+        /// Creates a directory.
         /// </summary>
         ///
-        /// <param name="path">ディレクトリのパス</param>
+        /// <param name="path">Path to create.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void CreateDirectory(string path) =>
@@ -625,10 +633,10 @@ namespace Cube.FileSystem
         /// CreateDirectoryCore
         ///
         /// <summary>
-        /// ディレクトリを作成します。
+        /// Creates a directory.
         /// </summary>
         ///
-        /// <param name="path">ディレクトリのパス</param>
+        /// <param name="path">Path to create.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void CreateDirectoryCore(string path) =>
@@ -643,12 +651,12 @@ namespace Cube.FileSystem
         /// Create
         ///
         /// <summary>
-        /// ファイルを新規作成します。
+        /// Creates or opens the specified file and gets the stream.
         /// </summary>
         ///
-        /// <param name="path">ファイルのパス</param>
+        /// <param name="path">Path to create or open file.</param>
         ///
-        /// <returns>書き込み用ストリーム</returns>
+        /// <returns>FileStream object to write.</returns>
         ///
         /* ----------------------------------------------------------------- */
         public FileStream Create(string path) => Func(nameof(Create), () =>
@@ -662,12 +670,12 @@ namespace Cube.FileSystem
         /// CreateCore
         ///
         /// <summary>
-        /// ファイルを新規作成します。
+        /// Creates or opens the specified file and gets the stream.
         /// </summary>
         ///
-        /// <param name="path">ファイルのパス</param>
+        /// <param name="path">Path to create or open file.</param>
         ///
-        /// <returns>書き込み用ストリーム</returns>
+        /// <returns>FileStream object to write.</returns>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual FileStream CreateCore(string path) => File.Create(path);
@@ -681,12 +689,12 @@ namespace Cube.FileSystem
         /// OpenRead
         ///
         /// <summary>
-        /// ファイルを読み込み専用で開きます。
+        /// Opens the specified file as read-only.
         /// </summary>
         ///
-        /// <param name="path">ファイルのパス</param>
+        /// <param name="path">File path.</param>
         ///
-        /// <returns>読み込み用ストリーム</returns>
+        /// <returns>Read-only stream.</returns>
         ///
         /* ----------------------------------------------------------------- */
         public FileStream OpenRead(string path) =>
@@ -697,12 +705,12 @@ namespace Cube.FileSystem
         /// OpenReadCore
         ///
         /// <summary>
-        /// ファイルを読み込み専用で開きます。
+        /// Opens the specified file as read-only.
         /// </summary>
         ///
-        /// <param name="path">ファイルのパス</param>
+        /// <param name="path">File path.</param>
         ///
-        /// <returns>読み込み用ストリーム</returns>
+        /// <returns>Read-only stream.</returns>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual FileStream OpenReadCore(string path) => File.OpenRead(path);
@@ -716,12 +724,12 @@ namespace Cube.FileSystem
         /// OpenWrite
         ///
         /// <summary>
-        /// ファイルを新規作成、または上書き用で開きます。
+        /// Creates or opens the specified file and gets the stream.
         /// </summary>
         ///
-        /// <param name="path">ファイルのパス</param>
+        /// <param name="path">Path to create or open file.</param>
         ///
-        /// <returns>書き込み用ストリーム</returns>
+        /// <returns>FileStream object to write.</returns>
         ///
         /* ----------------------------------------------------------------- */
         public FileStream OpenWrite(string path) => Func(nameof(OpenWrite), () =>
@@ -735,12 +743,12 @@ namespace Cube.FileSystem
         /// OpenWriteCore
         ///
         /// <summary>
-        /// ファイルを新規作成、または上書き用で開きます。
+        /// Creates or opens the specified file and gets the stream.
         /// </summary>
         ///
-        /// <param name="path">ファイルのパス</param>
+        /// <param name="path">Path to create or open file.</param>
         ///
-        /// <returns>書き込み用ストリーム</returns>
+        /// <returns>FileStream object to write.</returns>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual FileStream OpenWriteCore(string path) => File.OpenWrite(path);
@@ -754,11 +762,11 @@ namespace Cube.FileSystem
         /// Move
         ///
         /// <summary>
-        /// ファイルを移動します。
+        /// Moves the specified file.
         /// </summary>
         ///
-        /// <param name="src">移動前のパス</param>
-        /// <param name="dest">移動後のパス</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="dest">Destination path.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void Move(string src, string dest) => Move(src, dest, false);
@@ -768,12 +776,12 @@ namespace Cube.FileSystem
         /// Move
         ///
         /// <summary>
-        /// ファイルを移動します。
+        /// Moves the specified file.
         /// </summary>
         ///
-        /// <param name="src">移動前のパス</param>
-        /// <param name="dest">移動後のパス</param>
-        /// <param name="overwrite">上書きするかどうかを表す値</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="dest">Destination path.</param>
+        /// <param name="overwrite">Overwrite or not.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void Move(string src, string dest, bool overwrite)
@@ -788,11 +796,11 @@ namespace Cube.FileSystem
         /// MoveCore
         ///
         /// <summary>
-        /// ファイルを移動します。
+        /// Moves the specified file.
         /// </summary>
         ///
-        /// <param name="src">移動前のパス</param>
-        /// <param name="dest">移動後のパス</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="dest">Destination path.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void MoveCore(string src, string dest) => File.Move(src, dest);
@@ -806,11 +814,11 @@ namespace Cube.FileSystem
         /// Copy
         ///
         /// <summary>
-        /// ファイルをコピーします。
+        /// Copies the specified file.
         /// </summary>
         ///
-        /// <param name="src">コピー元のパス</param>
-        /// <param name="dest">コピー先のパス</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="dest">Destination path.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void Copy(string src, string dest) => Copy(src, dest, false);
@@ -820,12 +828,12 @@ namespace Cube.FileSystem
         /// Copy
         ///
         /// <summary>
-        /// ファイルをコピーします。
+        /// Copies the specified file.
         /// </summary>
         ///
-        /// <param name="src">コピー元のパス</param>
-        /// <param name="dest">コピー先のパス</param>
-        /// <param name="overwrite">上書きするかどうかを示す値</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="dest">Destination path.</param>
+        /// <param name="overwrite">Overwrite or not.</param>
         ///
         /* ----------------------------------------------------------------- */
         public void Copy(string src, string dest, bool overwrite)
@@ -840,12 +848,12 @@ namespace Cube.FileSystem
         /// CopyCore
         ///
         /// <summary>
-        /// ファイルをコピーします。
+        /// Copies the specified file.
         /// </summary>
         ///
-        /// <param name="src">コピー元のパス</param>
-        /// <param name="dest">コピー先のパス</param>
-        /// <param name="overwrite">上書きするかどうかを示す値</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="dest">Destination path.</param>
+        /// <param name="overwrite">Overwrite or not.</param>
         ///
         /* ----------------------------------------------------------------- */
         protected virtual void CopyCore(string src, string dest, bool overwrite) =>
@@ -862,7 +870,7 @@ namespace Cube.FileSystem
         /// Failed
         ///
         /// <summary>
-        /// 操作に失敗した時に発生するイベントです。
+        /// Occurs when any operations are failed.
         /// </summary>
         ///
         /// <remarks>
@@ -878,7 +886,7 @@ namespace Cube.FileSystem
         /// OnFailed
         ///
         /// <summary>
-        /// Failed イベントを発生させます。
+        /// Raises the Failed event.
         /// </summary>
         ///
         /// <remarks>
@@ -898,7 +906,7 @@ namespace Cube.FileSystem
         /// CreateDirectory
         ///
         /// <summary>
-        /// ディレクトリを生成し、各種属性をコピーします。
+        /// Creates a directory and sets the attributes.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -916,7 +924,7 @@ namespace Cube.FileSystem
         /// CreateParentDirectory
         ///
         /// <summary>
-        /// 親ディレクトリを生成します。
+        /// Creates the parent directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -931,7 +939,7 @@ namespace Cube.FileSystem
         /// CopyDirectory
         ///
         /// <summary>
-        /// ディレクトリおよびその中身をコピーします。
+        /// Copies the specified directory and files.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -963,7 +971,7 @@ namespace Cube.FileSystem
         /// CopyFile
         ///
         /// <summary>
-        /// ファイルをコピーします。
+        /// Copies the file.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -979,7 +987,7 @@ namespace Cube.FileSystem
         /// MoveDirectory
         ///
         /// <summary>
-        /// ディレクトリおよびその中身を移動します。
+        /// Moves the directory.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -1013,7 +1021,7 @@ namespace Cube.FileSystem
         /// MoveFile
         ///
         /// <summary>
-        /// ファイルを移動します。
+        /// Moves the file.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -1037,7 +1045,7 @@ namespace Cube.FileSystem
         /// MoveFile
         ///
         /// <summary>
-        /// ファイルを移動します。
+        /// Moves the file.
         /// </summary>
         ///
         /* ----------------------------------------------------------------- */
@@ -1053,7 +1061,7 @@ namespace Cube.FileSystem
         /// Action
         ///
         /// <summary>
-        /// 操作を実行します。
+        /// Invokes the action.
         /// </summary>
         ///
         /// <remarks>
@@ -1082,7 +1090,7 @@ namespace Cube.FileSystem
         /// Func
         ///
         /// <summary>
-        /// 操作を実行します。
+        /// Invokes the function.
         /// </summary>
         ///
         /// <remarks>
@@ -1109,7 +1117,7 @@ namespace Cube.FileSystem
         #endregion
 
         #region Fields
-        private static Controller _shared;
+        private static EntityController _shared;
         #endregion
     }
 }
