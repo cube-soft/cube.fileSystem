@@ -16,14 +16,14 @@
         <dependencies>
             <group targetFramework="net45">
                 <dependency id="AlphaFS" version="2.2.6" />
-                <dependency id="Cube.Core" version="2.0.0" />
+                <dependency id="Cube.Core" version="2.0.1" />
             </group>
             <group targetFramework="net35">
                 <dependency id="AlphaFS" version="2.2.6" />
-                <dependency id="Cube.Core" version="2.0.0" />
+                <dependency id="Cube.Core" version="2.0.1" />
             </group>
             <group targetFramework="netstandard2.0">
-                <dependency id="Cube.Core" version="2.0.0" />
+                <dependency id="Cube.Core" version="2.0.1" />
             </group>
         </dependencies>
     </metadata>
