@@ -3,17 +3,19 @@ Cube.FileSystem
 
 [![NuGet](https://img.shields.io/nuget/v/Cube.FileSystem.svg)](https://www.nuget.org/packages/Cube.FileSystem/)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/6exuqpkn7ct3a790?svg=true)](https://ci.appveyor.com/project/clown/cube-filesystem)
-[![Azure Pipelines](https://dev.azure.com/cube-soft-jp/Cube.FileSystem/_apis/build/status/cube-soft.Cube.FileSystem?branchName=master)](https://dev.azure.com/cube-soft-jp/Cube.FileSystem/_build)
 [![Codecov](https://codecov.io/gh/cube-soft/Cube.FileSystem/branch/master/graph/badge.svg)](https://codecov.io/gh/cube-soft/Cube.FileSystem)
 
-Cube.FileSystem is an I/O library for CubeSoft libraries and applications.
-The library is available for .NET Framework 3.5, 4.5 or higher.
+Cube.FileSystem is an I/O library including path normalization.
+The library is available for .NET Framework 3.5, 4.5, .NET Standard 2.0, or later.
 
 ## Installation
 
-You can install using NuGet like this:
+You can install the library through the NuGet package.
+Add a dependency in your project file using the following syntax:
 
-    PM> Install-Package Cube.FileSystem
+    <ItemGroup>
+        <PackageReference Include="Cube.FileSystem" Version="1.15.10" />
+    </ItemGroup>
 
 Or select it from the NuGet packages UI on Visual Studio.
 
@@ -25,10 +27,10 @@ Or select it from the NuGet packages UI on Visual Studio.
 ## Contributing
 
 1. Fork [Cube.FileSystem](https://github.com/cube-soft/Cube.FileSystem/fork) repository.
-2. Create a feature branch from the master or stable branch (e.g. git checkout -b my-new-feature origin/master). Note that the master branch may refer some pre-released NuGet packages. Try the [rake clean](https://github.com/cube-soft/Cube.FileSystem/blob/master/Rakefile) command when build errors occur.
+2. Create a feature branch from the master or stable branch (e.g. git checkout -b my-new-feature origin/master). Note that the master branch may refer some pre-released NuGet packages. Try the [rake clobber](https://github.com/cube-soft/Cube.FileSystem/blob/master/Rakefile) command when build errors occur.
 3. Commit your changes.
 4. Rebase your local changes against the master or stable branch.
-5. Run test suite with the [NUnit](https://nunit.org/) console or the Visual Studio (NUnit 3 test adapter) and confirm that it passes.
+5. Run the dotnet test command or the Visual Studio (NUnit 3 test adapter) and confirm that it passes.
 6. Create new Pull Request.
 
 ## License
