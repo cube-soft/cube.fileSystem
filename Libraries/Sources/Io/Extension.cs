@@ -87,42 +87,6 @@ namespace Cube.Mixin.IO
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Load35
-        ///
-        /// <summary>
-        /// Creates a new stream from the specified file and executes
-        /// the specified callback.
-        /// </summary>
-        ///
-        /// <remarks>
-        /// .NET 3.5 専用の拡張メソッドです。
-        /// </remarks>
-        ///
-        /* ----------------------------------------------------------------- */
-        public static T Load35<T>(this Source io, string src, Func<TextReader, T> callback)
-        {
-            var code = System.Text.Encoding.UTF8;
-            using (var ss = new StreamReader(io.OpenRead(src), code)) return callback(ss);
-        }
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// LoadEx
-        ///
-        /// <summary>
-        /// ファイルを開いて内容を読み込みます。
-        /// </summary>
-        ///
-        /// <remarks>
-        /// .NET 3.5 専用の拡張メソッドです。
-        /// </remarks>
-        ///
-        /* ----------------------------------------------------------------- */
-        public static T LoadOrDefault35<T>(this Source io, string src, Func<TextReader, T> callback, T error) =>
-            io.LogWarn(() => io.Load35(src, callback), error);
-
-        /* ----------------------------------------------------------------- */
-        ///
         /// Save
         ///
         /// <summary>
@@ -147,35 +111,99 @@ namespace Cube.Mixin.IO
 
         /* ----------------------------------------------------------------- */
         ///
-        /// Save35
+        /// Exists
         ///
         /// <summary>
-        /// Creates a new memory stream, executes the specified callback,
-        /// and writes the result to the specified file.
+        /// Determines if the specified path exists.
         /// </summary>
         ///
         /// <param name="io">I/O handler.</param>
-        /// <param name="dest">Path of the writing file.</param>
-        /// <param name="callback">User action.</param>
-        ///
-        /// <remarks>
-        /// .NET 3.5 専用の拡張メソッドです。
-        /// </remarks>
+        /// <param name="src">Path to check.</param>
         ///
         /* ----------------------------------------------------------------- */
-        public static void Save35(this Source io, string dest, Action<TextWriter> callback)
+        public static bool Exists(this Source io, string src)
         {
-            var code = System.Text.Encoding.UTF8;
-            using (var ss = new StreamWriter(new MemoryStream(), code))
-            {
-                callback(ss);
-                using (var ds = io.Create(dest))
-                {
-                    ss.BaseStream.Position = 0;
-                    ss.BaseStream.CopyTo(ds);
-                }
-            }
+            try { return io.Get(src).Exists; }
+            catch { return false; }
         }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Touch
+        ///
+        /// <summary>
+        /// Creates a new file or updates the timestamp of the specified
+        /// path.
+        /// </summary>
+        ///
+        /// <param name="io">I/O handler.</param>
+        /// <param name="src">Path to create or update.</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static void Touch(this Source io, string src) => Touch(io, src, DateTime.Now);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Touch
+        ///
+        /// <summary>
+        /// Creates a new file or updates the timestamp of the specified
+        /// path.
+        /// </summary>
+        ///
+        /// <param name="io">I/O handler.</param>
+        /// <param name="src">Path to create or update.</param>
+        /// <param name="timestamp">Timestamp to set.</param>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static void Touch(this Source io, string src, DateTime timestamp)
+        {
+            using (io.Create(src)) { }
+            io.SetLastWriteTime(src, timestamp);
+        }
+
+        #region Rename
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Rename
+        ///
+        /// <summary>
+        /// Changes the filename of a path string.
+        /// </summary>
+        ///
+        /// <param name="io">I/O handler.</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="filename">Filename to rename.</param>
+        ///
+        /// <returns>Renamed path.</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static string Rename(this Source io, string src, string filename) =>
+            io.Combine(io.Get(src).DirectoryName, filename);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// RenameExtension
+        ///
+        /// <summary>
+        /// Changes the extension of a path string.
+        /// </summary>
+        ///
+        /// <param name="io">I/O handler.</param>
+        /// <param name="src">Source path.</param>
+        /// <param name="extension">Extension to rename.</param>
+        ///
+        /// <returns>Renamed path.</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        public static string RenameExtension(this Source io, string src, string extension)
+        {
+            var e = io.Get(src);
+            return io.Combine(e.DirectoryName, $"{e.BaseName}{extension}");
+        }
+
+        #endregion
 
         #region GetTypeName
 

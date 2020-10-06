@@ -108,6 +108,58 @@ namespace Cube.FileSystem.Tests
 
         /* ----------------------------------------------------------------- */
         ///
+        /// Touch
+        ///
+        /// <summary>
+        /// Tests the Touch extended method.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [Test]
+        public void Touch()
+        {
+            var src = Get($"{nameof(Touch)}.txt");
+            Assert.That(IO.Exists(src), Is.False);
+
+            IO.Touch(src);
+            Assert.That(IO.Exists(src), Is.True);
+
+            var cmp = IO.Get(src).LastWriteTime;
+            System.Threading.Thread.Sleep(1000);
+            IO.Touch(src);
+            Assert.That(IO.Get(src).LastWriteTime, Is.GreaterThan(cmp));
+        }
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Rename
+        ///
+        /// <summary>
+        /// Tests the Rename extended method.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [TestCase(@"c:\foo\Sample.txt", "Rename.dat", ExpectedResult = @"c:\foo\Rename.dat")]
+        [TestCase(@"c:\bar\Remove.txt", "",           ExpectedResult = @"c:\bar")]
+        public string Rename(string src, string filename) => IO.Rename(src, filename);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// RenameExtension
+        ///
+        /// <summary>
+        /// Tests the RenameExtension extended method.
+        /// </summary>
+        ///
+        /* ----------------------------------------------------------------- */
+        [TestCase("Sample.txt", ".new", ExpectedResult = "Sample.new")]
+        [TestCase("Sample.txt", "",     ExpectedResult = "Sample")]
+        [TestCase("Sample",     ".txt", ExpectedResult = "Sample.txt")]
+        public string RenameExtension(string src, string extension) =>
+            IO.Get(IO.RenameExtension(src, extension)).Name;
+
+        /* ----------------------------------------------------------------- */
+        ///
         /// GetTypeName
         ///
         /// <summary>
