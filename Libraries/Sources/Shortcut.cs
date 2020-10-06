@@ -19,6 +19,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using Cube.Mixin.IO;
 using Cube.Mixin.String;
 
 namespace Cube.FileSystem
@@ -293,7 +294,7 @@ namespace Cube.FileSystem
             if (Activator.CreateInstance(type) is IShellLink sh)
             {
                 try { action(sh); }
-                finally { Marshal.ReleaseComObject(sh); }
+                finally { _ = Marshal.ReleaseComObject(sh); }
             }
         }
 
@@ -342,7 +343,7 @@ namespace Cube.FileSystem
         {
             var path = GetBuffer();
             src.GetIconLocation(path, path.Capacity, out var index);
-            if (index > 0) path.Append($",{index}");
+            if (index > 0) _ = path.Append($",{index}");
             return path.ToString();
         }
 

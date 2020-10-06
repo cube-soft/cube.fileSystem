@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Cube.Mixin.Logging;
 
 namespace Cube.FileSystem
@@ -191,7 +192,7 @@ namespace Cube.FileSystem
         ///
         /* ----------------------------------------------------------------- */
         public IEnumerable<string> GetFiles(string path, string pattern, SearchOption option) =>
-            GetFilesCore(path, pattern, option) ?? new string[0];
+            GetFilesCore(path, pattern, option) ?? Enumerable.Empty<string>();
 
         /* ----------------------------------------------------------------- */
         ///
@@ -317,6 +318,40 @@ namespace Cube.FileSystem
         /* ----------------------------------------------------------------- */
         protected virtual IEnumerable<string> GetDirectoriesCore(string path, string pattern, SearchOption option) =>
             Directory.Exists(path) ? Directory.GetDirectories(path, pattern, option) : null;
+
+        #endregion
+
+        #region Combine
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// Combine
+        ///
+        /// <summary>
+        /// Combiles the specified paths.
+        /// </summary>
+        ///
+        /// <param name="paths">Collection of paths.</param>
+        ///
+        /// <returns>Combined path.</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        public string Combine(params string[] paths) => CombineCore(paths);
+
+        /* ----------------------------------------------------------------- */
+        ///
+        /// CombineCore
+        ///
+        /// <summary>
+        /// Combiles the specified paths.
+        /// </summary>
+        ///
+        /// <param name="paths">Collection of paths.</param>
+        ///
+        /// <returns>Combined path.</returns>
+        ///
+        /* ----------------------------------------------------------------- */
+        protected virtual string CombineCore(params string[] paths) => Path.Combine(paths);
 
         #endregion
 
@@ -471,75 +506,6 @@ namespace Cube.FileSystem
             if (Directory.Exists(path)) Directory.SetLastAccessTime(path, time);
             else if (File.Exists(path)) File.SetLastAccessTime(path, time);
         }
-
-        #endregion
-
-        #region Combine
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Combine
-        ///
-        /// <summary>
-        /// Combiles the specified paths.
-        /// </summary>
-        ///
-        /// <param name="paths">Collection of paths.</param>
-        ///
-        /// <returns>Combined path.</returns>
-        ///
-        /* ----------------------------------------------------------------- */
-        public string Combine(params string[] paths) => CombineCore(paths);
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// CombineCore
-        ///
-        /// <summary>
-        /// Combiles the specified paths.
-        /// </summary>
-        ///
-        /// <param name="paths">Collection of paths.</param>
-        ///
-        /// <returns>Combined path.</returns>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected virtual string CombineCore(params string[] paths) => Path.Combine(paths);
-
-        #endregion
-
-        #region Exists
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// Exists
-        ///
-        /// <summary>
-        /// Determines whether the specified file or directory exists.
-        /// </summary>
-        ///
-        /// <param name="path">Target path.</param>
-        ///
-        /// <returns>true for exists.</returns>
-        ///
-        /* ----------------------------------------------------------------- */
-        public bool Exists(string path) => ExistsCore(path);
-
-        /* ----------------------------------------------------------------- */
-        ///
-        /// ExistsCore
-        ///
-        /// <summary>
-        /// Determines whether the specified file or directory exists.
-        /// </summary>
-        ///
-        /// <param name="path">Target path.</param>
-        ///
-        /// <returns>true for exists.</returns>
-        ///
-        /* ----------------------------------------------------------------- */
-        protected virtual bool ExistsCore(string path) =>
-            File.Exists(path) || Directory.Exists(path);
 
         #endregion
 
@@ -926,8 +892,8 @@ namespace Cube.FileSystem
         /* ----------------------------------------------------------------- */
         private void CreateParentDirectory(Entity info)
         {
-            var dir = info.DirectoryName;
-            if (!Exists(dir)) CreateDirectory(dir);
+            var dir = Get(info.DirectoryName);
+            if (!dir.Exists) CreateDirectory(dir.FullName);
         }
 
         /* ----------------------------------------------------------------- */
